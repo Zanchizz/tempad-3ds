@@ -1,0 +1,12 @@
+build/
+*.o
+*.d
+*.elf
+*.smdh
+*.3dsx
+*.cia
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/c_cpp_properties.json
+!.vscode/tasks.json
