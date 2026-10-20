@@ -14,14 +14,6 @@ Aprovecha la arquitectura de doble pantalla y la pantalla táctil resistiva de l
 
 ---
 
-## 📸 Demostración en Hardware Real
-
-<!-- Puedes colocar tu fotografía o captura en docs/hardware_demo.jpg -->
-![TemPad 3DS en consola real](docs/hardware_demo.jpg)
-
-*(Si aún no tomaste la foto, añade tu captura en la carpeta `docs/hardware_demo.jpg` para que se visualice automáticamente aquí).*
-
----
 
 ## ✨ Características (v0.1.0)
 
@@ -108,15 +100,7 @@ Para compilar el proyecto desde el código fuente necesitas el entorno oficial d
 
 ## 📦 Instalación en Nintendo 3DS
 
-### Método 1: Tarjeta SD (Manual)
-1. Copia el archivo `tempad-3ds.3dsx` generado a tu tarjeta SD en la siguiente ruta:
-   ```text
-   SD:/3ds/tempad-3ds/tempad-3ds.3dsx
-   ```
-2. Inserta la SD en tu consola e inicia el **Homebrew Launcher**.
-3. Selecciona **TemPad 3DS** de la lista para ejecutarlo.
-
-### Método 2: Envío Inalámbrico con `3dslink`
+### Método 1: Envío Inalámbrico con `3dslink`
 Si tu consola y tu PC están en la misma red Wi-Fi:
 1. Abre el **Homebrew Launcher** en tu 3DS y presiona el botón **`Y`** para activar el receptor `3dslink`.
 2. En tu computadora, ejecuta:
@@ -124,7 +108,7 @@ Si tu consola y tu PC están en la misma red Wi-Fi:
    3dslink tempad-3ds.3dsx
    ```
 
-### Método 3: Emulador (Azahar / Citra)
+### Método 2: Emulador (Azahar / Citra)
 * Simplemente arrastra y suelta el archivo `tempad-3ds.3dsx` dentro de la ventana de **Azahar** o **Citra**.
 
 ---
