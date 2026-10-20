@@ -6,7 +6,7 @@
 [![Release](https://img.shields.io/badge/Release-v0.1.0-amber.svg)](https://github.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
-> *"Por toda la eternidad. Siempre."* — Time Variance Authority
+> *"For all time. Always."* — Time Variance Authority
 
 **TemPad 3DS** es un homebrew para la familia de consolas **Nintendo 3DS / 2DS** que recrea fielmente el dispositivo **TemPad** de la TVA (*Time Variance Authority*), inspirado en la serie *Loki* de Marvel Studios.
 
