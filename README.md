@@ -91,3 +91,4 @@ El archivo ejecutable `tempad-3ds.3dsx` se generará en la raíz del proyecto.
 ## Aviso legal y créditos
 
 Proyecto experimental sin fines de lucro desarrollado con fines recreativos y educativos. Los conceptos visuales del TemPad y la estética de la TVA pertenecen a Marvel Studios.
+
