@@ -5,6 +5,8 @@
 #include "dashboard.h"
 #include "timedoor.h"
 
+C2D_Font g_tvaFont = NULL;
+
 // ---------------------------------------------------------
 // Bottom Screen Dispatcher
 // ---------------------------------------------------------
@@ -41,19 +43,24 @@ static void renderBottomScreen(C3D_RenderTarget* bottomScreen, C2D_TextBuf textB
 // Application Entry Point
 // ---------------------------------------------------------
 int main(int argc, char* argv[]) {
+    romfsInit();
     gfxInitDefault();
     C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
     C2D_Prepare();
+
+    g_tvaFont = C2D_FontLoad("romfs:/tva_font.bcfnt");
 
     C3D_RenderTarget* topScreen = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget* bottomScreen = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
 
     C2D_TextBuf textBufDynamic = C2D_TextBufNew(2048);
     if (!textBufDynamic) {
+        if (g_tvaFont) C2D_FontFree(g_tvaFont);
         C2D_Fini();
         C3D_Fini();
         gfxExit();
+        romfsExit();
         return 1;
     }
 
@@ -106,8 +113,12 @@ int main(int argc, char* argv[]) {
     }
 
     C2D_TextBufDelete(textBufDynamic);
+    if (g_tvaFont) {
+        C2D_FontFree(g_tvaFont);
+    }
     C2D_Fini();
     C3D_Fini();
     gfxExit();
+    romfsExit();
     return 0;
 }

@@ -60,8 +60,19 @@ typedef enum {
 } AppState;
 
 // ---------------------------------------------------------
-// Shared Drawing Primitive Helper
+// Shared TVA Custom Font & Drawing Primitives
 // ---------------------------------------------------------
+extern C2D_Font g_tvaFont;
+
+static inline void tempadParseText(C2D_Text* text, C2D_TextBuf buf, const char* str) {
+    if (g_tvaFont != NULL) {
+        C2D_TextFontParse(text, g_tvaFont, buf, str);
+    } else {
+        C2D_TextParse(text, buf, str);
+    }
+    C2D_TextOptimize(text);
+}
+
 static inline void drawBoxOutline(float x, float y, float w, float h, float thickness, u32 col) {
     C2D_DrawLine(x, y, col, x + w, y, col, thickness, 0.0f);             // Top
     C2D_DrawLine(x, y + h, col, x + w, y + h, col, thickness, 0.0f);     // Bottom

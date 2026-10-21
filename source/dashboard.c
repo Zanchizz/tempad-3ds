@@ -176,15 +176,13 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
 void dashboardRender(C2D_TextBuf textBufDynamic) {
     // 1. Top Title Bar
     C2D_Text txtTitle;
-    C2D_TextParse(&txtTitle, textBufDynamic, "TEMPAD // TVA MAIN DASHBOARD");
-    C2D_TextOptimize(&txtTitle);
-    C2D_DrawText(&txtTitle, C2D_WithColor, 12.0f, 10.0f, 0.5f, 0.44f, 0.44f, CLR_AMBER_BRIGHT);
+    tempadParseText(&txtTitle, textBufDynamic, "TEMPAD // TVA MAIN DASHBOARD");
+    C2D_DrawText(&txtTitle, C2D_WithColor, 12.0f, 10.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_BRIGHT);
 
     // Quick Status Telemetry
     C2D_Text txtQuick;
-    C2D_TextParse(&txtQuick, textBufDynamic, s_statusMessage);
-    C2D_TextOptimize(&txtQuick);
-    C2D_DrawText(&txtQuick, C2D_WithColor, 12.0f, 26.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_DARK);
+    tempadParseText(&txtQuick, textBufDynamic, s_statusMessage);
+    C2D_DrawText(&txtQuick, C2D_WithColor, 12.0f, 26.0f, 0.5f, 0.32f, 0.32f, CLR_AMBER_DARK);
 
     // 2. 2x2 Matrix (TIMEDOOR, MISS MINUTES, SETTINGS, DIRECTORY)
     for (int i = 0; i < DASH_APP_COUNT; i++) {
@@ -227,21 +225,18 @@ void dashboardRender(C2D_TextBuf textBufDynamic) {
         }
 
         C2D_Text txtTile;
-        C2D_TextParse(&txtTile, textBufDynamic, t->title);
-        C2D_TextOptimize(&txtTile);
-        C2D_DrawText(&txtTile, C2D_WithColor, drawX + 8.0f, drawY + 36.0f, 0.5f, 0.40f, 0.40f, textCol);
+        tempadParseText(&txtTile, textBufDynamic, t->title);
+        C2D_DrawText(&txtTile, C2D_WithColor, drawX + 6.0f, drawY + 36.0f, 0.5f, 0.35f, 0.35f, textCol);
 
         C2D_Text txtSub;
-        C2D_TextParse(&txtSub, textBufDynamic, t->code);
-        C2D_TextOptimize(&txtSub);
-        C2D_DrawText(&txtSub, C2D_WithColor, drawX + 8.0f, drawY + 54.0f, 0.5f, 0.32f, 0.32f, subCol);
+        tempadParseText(&txtSub, textBufDynamic, t->code);
+        C2D_DrawText(&txtSub, C2D_WithColor, drawX + 6.0f, drawY + 54.0f, 0.5f, 0.30f, 0.30f, subCol);
     }
 
     // 3. Action List (Right Column)
     C2D_Text txtActHeader;
-    C2D_TextParse(&txtActHeader, textBufDynamic, "ACTIONS //////");
-    C2D_TextOptimize(&txtActHeader);
-    C2D_DrawText(&txtActHeader, C2D_WithColor, 214.0f, 46.0f, 0.5f, 0.38f, 0.38f, CLR_AMBER_BRIGHT);
+    tempadParseText(&txtActHeader, textBufDynamic, "ACTIONS //////");
+    C2D_DrawText(&txtActHeader, C2D_WithColor, 214.0f, 46.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_BRIGHT);
 
     for (int i = 0; i < DASH_ACT_COUNT; i++) {
         const DashboardActionDef* a = &s_dashActions[i];
@@ -264,16 +259,14 @@ void dashboardRender(C2D_TextBuf textBufDynamic) {
         drawBoxOutline(drawX, drawY, a->w, a->h, 1.5f, btnBorder);
 
         C2D_Text txtLabel;
-        C2D_TextParse(&txtLabel, textBufDynamic, a->label);
-        C2D_TextOptimize(&txtLabel);
+        tempadParseText(&txtLabel, textBufDynamic, a->label);
         C2D_DrawText(&txtLabel, C2D_WithColor | C2D_AlignCenter,
-                     drawX + (a->w / 2.0f), drawY + 11.0f, 0.5f, 0.38f, 0.38f, btnText);
+                     drawX + (a->w / 2.0f), drawY + 11.0f, 0.5f, 0.34f, 0.34f, btnText);
     }
 
     // 4. Bottom Footer Instructions
     C2D_Text txtFooter;
-    C2D_TextParse(&txtFooter, textBufDynamic, "SELECT MODULE OR 'RUN PROGRAM' // [START] EXIT");
-    C2D_TextOptimize(&txtFooter);
-    C2D_DrawText(&txtFooter, C2D_WithColor | C2D_AlignCenter, 160.0f, 216.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_DARK);
+    tempadParseText(&txtFooter, textBufDynamic, "SELECT MODULE OR 'RUN PROGRAM' // [START] EXIT");
+    C2D_DrawText(&txtFooter, C2D_WithColor | C2D_AlignCenter, 160.0f, 216.0f, 0.5f, 0.32f, 0.32f, CLR_AMBER_DARK);
 }
 

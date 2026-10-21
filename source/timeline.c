@@ -163,9 +163,8 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
 
     // 7. Top Screen Telemetry & Labels
     C2D_Text txtTopHeader;
-    C2D_TextParse(&txtTopHeader, textBufDynamic, "TVA // SACRED TIMELINE");
-    C2D_TextOptimize(&txtTopHeader);
-    C2D_DrawText(&txtTopHeader, C2D_WithColor, 12.0f, 8.0f, 0.5f, 0.44f, 0.44f, CLR_AMBER_TEXT);
+    tempadParseText(&txtTopHeader, textBufDynamic, "TVA // SACRED TIMELINE");
+    C2D_DrawText(&txtTopHeader, C2D_WithColor, 12.0f, 8.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_TEXT);
 
     const char* modeText = "[MODE: DASHBOARD]";
     if (currentState == STATE_TIMEDOOR_SELECT) {
@@ -175,9 +174,8 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
     }
 
     C2D_Text txtMode;
-    C2D_TextParse(&txtMode, textBufDynamic, modeText);
-    C2D_TextOptimize(&txtMode);
-    C2D_DrawText(&txtMode, C2D_WithColor | C2D_AlignRight, 388.0f, 8.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_BRIGHT);
+    tempadParseText(&txtMode, textBufDynamic, modeText);
+    C2D_DrawText(&txtMode, C2D_WithColor | C2D_AlignRight, 388.0f, 8.0f, 0.5f, 0.36f, 0.36f, CLR_AMBER_BRIGHT);
 
     // Bottom Status Telemetry
     char telemetry[64];
@@ -201,8 +199,7 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
     }
 
     C2D_Text txtDyn;
-    C2D_TextParse(&txtDyn, textBufDynamic, telemetry);
-    C2D_TextOptimize(&txtDyn);
-    C2D_DrawText(&txtDyn, C2D_WithColor, 12.0f, 218.0f, 0.5f, 0.40f, 0.40f, statusClr);
+    tempadParseText(&txtDyn, textBufDynamic, telemetry);
+    C2D_DrawText(&txtDyn, C2D_WithColor, 12.0f, 218.0f, 0.5f, 0.36f, 0.36f, statusClr);
 }
 
