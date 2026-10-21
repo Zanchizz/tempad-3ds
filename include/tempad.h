@@ -23,10 +23,10 @@
 #define CLR_BORDER_MID          C2D_Color32(110, 68, 24, 255)
 #define CLR_GRID                C2D_Color32(36, 22, 8, 140)
 
-// Sacred Timeline (Canonical Bright White / Light Gray)
-#define CLR_TIMELINE_MAIN       C2D_Color32(235, 235, 240, 255)
-#define CLR_TIMELINE_CORE       C2D_Color32(255, 255, 255, 255)
-#define CLR_TIMELINE_GLOW       C2D_Color32(180, 185, 205, 110)
+// Sacred Timeline (Canonical Muted Gray / Silver)
+#define CLR_TIMELINE_MAIN       C2D_Color32(150, 155, 165, 255)
+#define CLR_TIMELINE_CORE       C2D_Color32(175, 180, 190, 255)
+#define CLR_TIMELINE_GLOW       C2D_Color32(100, 105, 115, 180)
 
 // TVA Amber / Orange (UI & Variant Branches)
 #define CLR_AMBER_BRIGHT        C2D_Color32(255, 195, 45, 255)

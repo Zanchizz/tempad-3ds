@@ -1,5 +1,6 @@
 #include "dashboard.h"
 #include "timeline.h"
+#include <stdio.h>
 #include <string.h>
 
 // ---------------------------------------------------------
@@ -61,9 +62,44 @@ void dashboardSetStatus(const char* msg) {
 }
 
 void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* currentState) {
-    // 1. Physical 'A' Button
+    // 1. Branch Selection (D-Pad Left/Right or L/R Shoulder Buttons)
+    if (kDown & (KEY_LEFT | KEY_L)) {
+        timelineSelectPrevBranch();
+        int idx = timelineGetSelectedBranchIndex();
+        if (idx >= 0) {
+            char msg[64];
+            snprintf(msg, sizeof(msg), "TARGET: BRANCH #%02d SELECTED", idx + 1);
+            dashboardSetStatus(msg);
+        }
+    }
+    if (kDown & (KEY_RIGHT | KEY_R)) {
+        timelineSelectNextBranch();
+        int idx = timelineGetSelectedBranchIndex();
+        if (idx >= 0) {
+            char msg[64];
+            snprintf(msg, sizeof(msg), "TARGET: BRANCH #%02d SELECTED", idx + 1);
+            dashboardSetStatus(msg);
+        }
+    }
+
+    // 2. Selective Branch Pruning (Button X, or Button A when branches are active)
+    if (kDown & KEY_X) {
+        int idx = timelineGetSelectedBranchIndex();
+        if (idx >= 0 && timelinePruneSelected()) {
+            char msg[64];
+            snprintf(msg, sizeof(msg), "PRUNING TARGET BRANCH #%02d...", idx + 1);
+            dashboardSetStatus(msg);
+        }
+    }
+
+    // 3. Physical 'A' Button (Prunes selected branch if active, else runs module)
     if (kDown & KEY_A) {
-        if (s_selectedDashApp == DASH_APP_TIMEDOOR) {
+        int idx = timelineGetSelectedBranchIndex();
+        if (idx >= 0 && timelinePruneSelected()) {
+            char msg[64];
+            snprintf(msg, sizeof(msg), "PRUNING TARGET BRANCH #%02d...", idx + 1);
+            dashboardSetStatus(msg);
+        } else if (s_selectedDashApp == DASH_APP_TIMEDOOR) {
             *currentState = STATE_TIMEDOOR_SELECT;
             dashboardSetStatus("SUBMENU: SAVED TIMES ACTIVATED");
             return;
@@ -76,18 +112,12 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
         }
     }
 
-    // 2. D-Pad Navigation
+    // 4. D-Pad Up/Down Navigation for Dashboard Modules
     if (kDown & KEY_UP) {
         if (s_selectedDashApp >= 2) s_selectedDashApp -= 2;
     }
     if (kDown & KEY_DOWN) {
         if (s_selectedDashApp < 2) s_selectedDashApp += 2;
-    }
-    if (kDown & KEY_LEFT) {
-        if (s_selectedDashApp % 2 == 1) s_selectedDashApp--;
-    }
-    if (kDown & KEY_RIGHT) {
-        if (s_selectedDashApp % 2 == 0) s_selectedDashApp++;
     }
 
     // 3. Continuous Touch Feedback (kHeld)
