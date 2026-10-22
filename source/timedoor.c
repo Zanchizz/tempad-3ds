@@ -3,20 +3,10 @@
 #include <math.h>
 
 // ---------------------------------------------------------
-// Preloaded TVA Temporal Destinations
+// Internal Timedoor State (Destinations in include/tva_catalog.h)
 // ---------------------------------------------------------
-static const Location s_locations[] = {
-    { "1705, LAMENTIS", "0742.11.LMT1.9021", "SECTOR C-2 // EXTINCTION"  },
-    { "2012, EARTH",    "1255.92.FGV3.8534", "NEW YORK // BATTLE OF NY"  },
-    { "1412, TITAN",    "0412.88.TTN9.1102", "GALAXY M-31 // PRE-COLLAPSE" },
-    { "2077, ASGARD",   "2077.01.ASG4.6549", "GOLDEN REALM // CATACLYSM" }
-};
-
-#define LOCATION_COUNT ((int)(sizeof(s_locations) / sizeof(s_locations[0])))
-
-// ---------------------------------------------------------
-// Internal Timedoor State
-// ---------------------------------------------------------
+#define LOCATION_COUNT TIMEDOOR_LOCATION_COUNT
+#define s_locations    g_timedoorLocations
 static int s_selectedDestination = 1; // Default: 2012, EARTH
 static int s_pressedDestCell = -1;
 static int s_pressedScrollBtn = 0;    // 1: Up, 2: Down, 0: None
@@ -179,18 +169,18 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
 
     C2D_Text txtBack;
     tempadParseText(&txtBack, textBufDynamic, "< BACK");
-    C2D_DrawText(&txtBack, C2D_WithColor | C2D_AlignCenter, 8.0f + (backW / 2.0f), 9.0f, 0.5f, 0.35f, 0.35f, backTxt);
+    C2D_DrawText(&txtBack, C2D_WithColor | C2D_AlignCenter, 8.0f + (backW / 2.0f), 8.0f, 0.5f, 0.41f, 0.43f, backTxt);
 
     C2D_Text txtSubHeader;
     tempadParseText(&txtSubHeader, textBufDynamic, "TVA // TEMPORAL COORDINATES");
-    C2D_DrawText(&txtSubHeader, C2D_WithColor | C2D_AlignRight, 312.0f, 9.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtSubHeader, C2D_WithColor | C2D_AlignRight, 312.0f, 8.0f, 0.5f, 0.39f, 0.42f, CLR_AMBER_DARK);
 
     // -----------------------------------------------------
     // LEFT COLUMN (Destination Preview)
     // -----------------------------------------------------
     C2D_Text txtLeftTitle;
     tempadParseText(&txtLeftTitle, textBufDynamic, "SELECT TIME");
-    C2D_DrawText(&txtLeftTitle, C2D_WithColor, 10.0f, 32.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_BRIGHT);
+    C2D_DrawText(&txtLeftTitle, C2D_WithColor, 10.0f, 30.0f, 0.5f, 0.46f, 0.48f, CLR_AMBER_BRIGHT);
 
     // Camera Viewfinder / Thumbnail Placeholder (130x65 px)
     const float viewX = 10.0f, viewY = 48.0f, viewW = 130.0f, viewH = 65.0f;
@@ -211,26 +201,26 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
 
     C2D_Text txtCamFeed;
     tempadParseText(&txtCamFeed, textBufDynamic, "[ ARCHIVE FEED ]");
-    C2D_DrawText(&txtCamFeed, C2D_WithColor, viewX + 6.0f, viewY + 5.0f, 0.5f, 0.28f, 0.28f, CLR_AMBER_TEXT);
+    C2D_DrawText(&txtCamFeed, C2D_WithColor, viewX + 6.0f, viewY + 4.0f, 0.5f, 0.34f, 0.36f, CLR_AMBER_TEXT);
 
     // Selected Location Name & Details
     const Location* curLoc = &s_locations[s_selectedDestination];
 
     C2D_Text txtDestName;
     tempadParseText(&txtDestName, textBufDynamic, curLoc->name);
-    C2D_DrawText(&txtDestName, C2D_WithColor, 10.0f, 120.0f, 0.5f, 0.45f, 0.45f, CLR_AMBER_BRIGHT);
+    C2D_DrawText(&txtDestName, C2D_WithColor, 10.0f, 118.0f, 0.5f, 0.48f, 0.50f, CLR_AMBER_BRIGHT);
 
     C2D_Text txtCoordsLabel;
     tempadParseText(&txtCoordsLabel, textBufDynamic, "COORDINATES:");
-    C2D_DrawText(&txtCoordsLabel, C2D_WithColor, 10.0f, 142.0f, 0.5f, 0.30f, 0.30f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtCoordsLabel, C2D_WithColor, 10.0f, 140.0f, 0.5f, 0.36f, 0.38f, CLR_AMBER_DARK);
 
     C2D_Text txtCoords;
     tempadParseText(&txtCoords, textBufDynamic, curLoc->coords);
-    C2D_DrawText(&txtCoords, C2D_WithColor, 10.0f, 155.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_TEXT);
+    C2D_DrawText(&txtCoords, C2D_WithColor, 10.0f, 154.0f, 0.5f, 0.40f, 0.42f, CLR_AMBER_TEXT);
 
     C2D_Text txtEra;
     tempadParseText(&txtEra, textBufDynamic, curLoc->era);
-    C2D_DrawText(&txtEra, C2D_WithColor, 10.0f, 172.0f, 0.5f, 0.28f, 0.28f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtEra, C2D_WithColor, 10.0f, 171.0f, 0.5f, 0.31f, 0.35f, CLR_AMBER_DARK);
 
     // Deploy Timedoor Button
     C2D_DrawRectSolid(10.0f, 192.0f, 0.0f, 130.0f, 36.0f, CLR_BTN_NORMAL);
@@ -238,14 +228,14 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
 
     C2D_Text txtDeploy;
     tempadParseText(&txtDeploy, textBufDynamic, "[ OPEN TIMEDOOR ]");
-    C2D_DrawText(&txtDeploy, C2D_WithColor | C2D_AlignCenter, 75.0f, 202.0f, 0.5f, 0.36f, 0.36f, CLR_AMBER_CORE);
+    C2D_DrawText(&txtDeploy, C2D_WithColor | C2D_AlignCenter, 75.0f, 200.0f, 0.5f, 0.41f, 0.44f, CLR_AMBER_CORE);
 
     // -----------------------------------------------------
     // RIGHT COLUMN ("SAVED TIMES" Destination List)
     // -----------------------------------------------------
     C2D_Text txtListHeader;
     tempadParseText(&txtListHeader, textBufDynamic, "SAVED TIMES //////");
-    C2D_DrawText(&txtListHeader, C2D_WithColor, 152.0f, 32.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_BRIGHT);
+    C2D_DrawText(&txtListHeader, C2D_WithColor, 152.0f, 30.0f, 0.5f, 0.44f, 0.46f, CLR_AMBER_BRIGHT);
 
     const float listX = 152.0f;
     const float cellW = 138.0f;
@@ -266,12 +256,12 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
         if (isSelected) {
             C2D_Text txtMarker;
             tempadParseText(&txtMarker, textBufDynamic, ">");
-            C2D_DrawText(&txtMarker, C2D_WithColor, listX + 6.0f, cellY + 9.0f, 0.5f, 0.40f, 0.40f, textCol);
+            C2D_DrawText(&txtMarker, C2D_WithColor, listX + 5.0f, cellY + 7.0f, 0.5f, 0.44f, 0.46f, textCol);
         }
 
         C2D_Text txtItem;
         tempadParseText(&txtItem, textBufDynamic, s_locations[i].name);
-        C2D_DrawText(&txtItem, C2D_WithColor, listX + (isSelected ? 18.0f : 10.0f), cellY + 9.0f, 0.5f, 0.38f, 0.38f, textCol);
+        C2D_DrawText(&txtItem, C2D_WithColor, listX + (isSelected ? 17.0f : 9.0f), cellY + 7.0f, 0.5f, 0.42f, 0.45f, textCol);
     }
 
     // Right Scrollbar Simulation
@@ -285,7 +275,7 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
     drawBoxOutline(sbX, sbY, sbW, 16.0f, 1.0f, CLR_BORDER_MID);
     C2D_Text txtUp;
     tempadParseText(&txtUp, textBufDynamic, "^");
-    C2D_DrawText(&txtUp, C2D_WithColor | C2D_AlignCenter, sbX + 8.0f, sbY + 1.0f, 0.5f, 0.36f, 0.36f, CLR_AMBER_TEXT);
+    C2D_DrawText(&txtUp, C2D_WithColor | C2D_AlignCenter, sbX + 8.0f, sbY, 0.5f, 0.42f, 0.42f, CLR_AMBER_TEXT);
 
     // Down Arrow
     u32 downBg = (s_pressedScrollBtn == 2) ? CLR_AMBER_BRIGHT : CLR_BTN_NORMAL;
@@ -293,7 +283,7 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
     drawBoxOutline(sbX, sbY + sbH - 16.0f, sbW, 16.0f, 1.0f, CLR_BORDER_MID);
     C2D_Text txtDown;
     tempadParseText(&txtDown, textBufDynamic, "v");
-    C2D_DrawText(&txtDown, C2D_WithColor | C2D_AlignCenter, sbX + 8.0f, sbY + sbH - 15.0f, 0.5f, 0.36f, 0.36f, CLR_AMBER_TEXT);
+    C2D_DrawText(&txtDown, C2D_WithColor | C2D_AlignCenter, sbX + 8.0f, sbY + sbH - 16.0f, 0.5f, 0.42f, 0.42f, CLR_AMBER_TEXT);
 
     // Slider Thumb
     float thumbY = sbY + 18.0f + (float)s_selectedDestination * ((sbH - 60.0f) / (LOCATION_COUNT - 1));
@@ -302,7 +292,7 @@ void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase) {
 
 void timedoorRenderActive(C2D_TextBuf textBufDynamic, float animPhase) {
     // 1. Quick Close / Return Button
-    float backW = 128.0f, backH = 22.0f;
+    float backW = 142.0f, backH = 22.0f;
     u32 backBg = s_pressedBackButton ? CLR_AMBER_BRIGHT : CLR_BTN_NORMAL;
     u32 backTxt = s_pressedBackButton ? CLR_TEXT_INVERTED : CLR_AMBER_TEXT;
 
@@ -311,7 +301,7 @@ void timedoorRenderActive(C2D_TextBuf textBufDynamic, float animPhase) {
 
     C2D_Text txtBack;
     tempadParseText(&txtBack, textBufDynamic, "< [B] CLOSE TIMEDOOR");
-    C2D_DrawText(&txtBack, C2D_WithColor | C2D_AlignCenter, 8.0f + (backW / 2.0f), 9.0f, 0.5f, 0.34f, 0.34f, backTxt);
+    C2D_DrawText(&txtBack, C2D_WithColor | C2D_AlignCenter, 8.0f + (backW / 2.0f), 8.0f, 0.5f, 0.39f, 0.42f, backTxt);
 
     // 2. Retro Open Timedoor Portal Graphic
     float portalX = 160.0f, portalY = 115.0f;
@@ -330,14 +320,14 @@ void timedoorRenderActive(C2D_TextBuf textBufDynamic, float animPhase) {
 
     C2D_Text txtStatus;
     tempadParseText(&txtStatus, textBufDynamic, "TIMEDOOR OPEN // STABLE LINK");
-    C2D_DrawText(&txtStatus, C2D_WithColor | C2D_AlignCenter, 160.0f, 36.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_BRIGHT);
+    C2D_DrawText(&txtStatus, C2D_WithColor | C2D_AlignCenter, 160.0f, 34.0f, 0.5f, 0.45f, 0.48f, CLR_AMBER_BRIGHT);
 
     C2D_Text txtDest;
     tempadParseText(&txtDest, textBufDynamic, curLoc->name);
-    C2D_DrawText(&txtDest, C2D_WithColor | C2D_AlignCenter, 160.0f, 192.0f, 0.5f, 0.48f, 0.48f, CLR_AMBER_CORE);
+    C2D_DrawText(&txtDest, C2D_WithColor | C2D_AlignCenter, 160.0f, 190.0f, 0.5f, 0.54f, 0.56f, CLR_AMBER_CORE);
 
     C2D_Text txtCoord;
     tempadParseText(&txtCoord, textBufDynamic, curLoc->coords);
-    C2D_DrawText(&txtCoord, C2D_WithColor | C2D_AlignCenter, 160.0f, 214.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtCoord, C2D_WithColor | C2D_AlignCenter, 160.0f, 213.0f, 0.5f, 0.41f, 0.43f, CLR_AMBER_DARK);
 }
 

@@ -65,39 +65,39 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
     // 1. Branch Selection (D-Pad Left/Right or L/R Shoulder Buttons)
     if (kDown & (KEY_LEFT | KEY_L)) {
         timelineSelectPrevBranch();
-        int idx = timelineGetSelectedBranchIndex();
-        if (idx >= 0) {
+        const VariantProfile* var = timelineGetSelectedVariant();
+        if (var) {
             char msg[64];
-            snprintf(msg, sizeof(msg), "TARGET: BRANCH #%02d SELECTED", idx + 1);
+            snprintf(msg, sizeof(msg), "TARGET: VARIANT# %s (%d)", var->variant_id, var->year);
             dashboardSetStatus(msg);
         }
     }
     if (kDown & (KEY_RIGHT | KEY_R)) {
         timelineSelectNextBranch();
-        int idx = timelineGetSelectedBranchIndex();
-        if (idx >= 0) {
+        const VariantProfile* var = timelineGetSelectedVariant();
+        if (var) {
             char msg[64];
-            snprintf(msg, sizeof(msg), "TARGET: BRANCH #%02d SELECTED", idx + 1);
+            snprintf(msg, sizeof(msg), "TARGET: VARIANT# %s (%d)", var->variant_id, var->year);
             dashboardSetStatus(msg);
         }
     }
 
     // 2. Selective Branch Pruning (Button X, or Button A when branches are active)
     if (kDown & KEY_X) {
-        int idx = timelineGetSelectedBranchIndex();
-        if (idx >= 0 && timelinePruneSelected()) {
+        const VariantProfile* var = timelineGetSelectedVariant();
+        if (var && timelinePruneSelected()) {
             char msg[64];
-            snprintf(msg, sizeof(msg), "PRUNING TARGET BRANCH #%02d...", idx + 1);
+            snprintf(msg, sizeof(msg), "PRUNING VARIANT# %s...", var->variant_id);
             dashboardSetStatus(msg);
         }
     }
 
     // 3. Physical 'A' Button (Prunes selected branch if active, else runs module)
     if (kDown & KEY_A) {
-        int idx = timelineGetSelectedBranchIndex();
-        if (idx >= 0 && timelinePruneSelected()) {
+        const VariantProfile* var = timelineGetSelectedVariant();
+        if (var && timelinePruneSelected()) {
             char msg[64];
-            snprintf(msg, sizeof(msg), "PRUNING TARGET BRANCH #%02d...", idx + 1);
+            snprintf(msg, sizeof(msg), "PRUNING VARIANT# %s...", var->variant_id);
             dashboardSetStatus(msg);
         } else if (s_selectedDashApp == DASH_APP_TIMEDOOR) {
             *currentState = STATE_TIMEDOOR_SELECT;
@@ -207,12 +207,12 @@ void dashboardRender(C2D_TextBuf textBufDynamic) {
     // 1. Top Title Bar
     C2D_Text txtTitle;
     tempadParseText(&txtTitle, textBufDynamic, "TEMPAD // TVA MAIN DASHBOARD");
-    C2D_DrawText(&txtTitle, C2D_WithColor, 12.0f, 10.0f, 0.5f, 0.40f, 0.40f, CLR_AMBER_BRIGHT);
+    C2D_DrawText(&txtTitle, C2D_WithColor, 12.0f, 8.0f, 0.5f, 0.45f, 0.47f, CLR_AMBER_BRIGHT);
 
     // Quick Status Telemetry
     C2D_Text txtQuick;
     tempadParseText(&txtQuick, textBufDynamic, s_statusMessage);
-    C2D_DrawText(&txtQuick, C2D_WithColor, 12.0f, 26.0f, 0.5f, 0.32f, 0.32f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtQuick, C2D_WithColor, 12.0f, 25.0f, 0.5f, 0.37f, 0.40f, CLR_AMBER_DARK);
 
     // 2. 2x2 Matrix (TIMEDOOR, MISS MINUTES, SETTINGS, DIRECTORY)
     for (int i = 0; i < DASH_APP_COUNT; i++) {
@@ -256,17 +256,17 @@ void dashboardRender(C2D_TextBuf textBufDynamic) {
 
         C2D_Text txtTile;
         tempadParseText(&txtTile, textBufDynamic, t->title);
-        C2D_DrawText(&txtTile, C2D_WithColor, drawX + 6.0f, drawY + 36.0f, 0.5f, 0.35f, 0.35f, textCol);
+        C2D_DrawText(&txtTile, C2D_WithColor, drawX + 5.0f, drawY + 34.0f, 0.5f, 0.40f, 0.43f, textCol);
 
         C2D_Text txtSub;
         tempadParseText(&txtSub, textBufDynamic, t->code);
-        C2D_DrawText(&txtSub, C2D_WithColor, drawX + 6.0f, drawY + 54.0f, 0.5f, 0.30f, 0.30f, subCol);
+        C2D_DrawText(&txtSub, C2D_WithColor, drawX + 5.0f, drawY + 53.0f, 0.5f, 0.36f, 0.38f, subCol);
     }
 
     // 3. Action List (Right Column)
     C2D_Text txtActHeader;
     tempadParseText(&txtActHeader, textBufDynamic, "ACTIONS //////");
-    C2D_DrawText(&txtActHeader, C2D_WithColor, 214.0f, 46.0f, 0.5f, 0.35f, 0.35f, CLR_AMBER_BRIGHT);
+    C2D_DrawText(&txtActHeader, C2D_WithColor, 214.0f, 44.0f, 0.5f, 0.40f, 0.43f, CLR_AMBER_BRIGHT);
 
     for (int i = 0; i < DASH_ACT_COUNT; i++) {
         const DashboardActionDef* a = &s_dashActions[i];
@@ -291,12 +291,12 @@ void dashboardRender(C2D_TextBuf textBufDynamic) {
         C2D_Text txtLabel;
         tempadParseText(&txtLabel, textBufDynamic, a->label);
         C2D_DrawText(&txtLabel, C2D_WithColor | C2D_AlignCenter,
-                     drawX + (a->w / 2.0f), drawY + 11.0f, 0.5f, 0.34f, 0.34f, btnText);
+                     drawX + (a->w / 2.0f), drawY + 9.0f, 0.5f, 0.38f, 0.42f, btnText);
     }
 
     // 4. Bottom Footer Instructions
     C2D_Text txtFooter;
     tempadParseText(&txtFooter, textBufDynamic, "SELECT MODULE OR 'RUN PROGRAM' // [START] EXIT");
-    C2D_DrawText(&txtFooter, C2D_WithColor | C2D_AlignCenter, 160.0f, 216.0f, 0.5f, 0.32f, 0.32f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtFooter, C2D_WithColor | C2D_AlignCenter, 160.0f, 214.0f, 0.5f, 0.37f, 0.40f, CLR_AMBER_DARK);
 }
 

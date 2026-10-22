@@ -2,15 +2,7 @@
 #define TIMEDOOR_H
 
 #include "tempad.h"
-
-// ---------------------------------------------------------
-// Temporal Location Structure ("Saved Times")
-// ---------------------------------------------------------
-typedef struct Location {
-    const char* name;
-    const char* coords;
-    const char* era;
-} Location;
+#include "tva_catalog.h"
 
 // ---------------------------------------------------------
 // Timedoor Module API
@@ -23,4 +15,3 @@ void timedoorRenderActive(C2D_TextBuf textBufDynamic, float animPhase);
 const Location* timedoorGetSelectedLocation(void);
 
 #endif // TIMEDOOR_H
-
