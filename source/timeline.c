@@ -1,4 +1,5 @@
 #include "timeline.h"
+#include "assets.h"
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,24 +15,24 @@ static int s_selected_branch_index = -1;
 static int s_spawnTimer = 0;
 
 static float getSacredTimelineY(float x, float phase) {
-    return TIMELINE_BASELINE_Y + 2.2f * sinf(x * 0.038f + phase)
-                               + 1.1f * sinf(x * 0.080f - phase * 1.3f);
+    return TIMELINE_BASELINE_Y + (0.70f * SACRED_WAVE_AMPLITUDE) * sinf(x * 0.032f + phase)
+                               + (0.30f * SACRED_WAVE_AMPLITUDE) * sinf(x * 0.068f - phase * 1.15f);
 }
 
 static u32 makeBranchColorWithAlpha(bool isCritical, bool isSelected, u8 alpha) {
     if (isCritical) {
         return C2D_Color32(250, 48, 24, alpha);
     } else if (isSelected) {
-        return C2D_Color32(255, 245, 190, alpha);
+        return C2D_Color32(255, 240, 145, alpha);
     }
-    return C2D_Color32(255, 190, 40, alpha);
+    return C2D_Color32(255, 220, 75, alpha);
 }
 
 static u32 makeGlowColorWithAlpha(bool isCritical, u8 alpha) {
     if (isCritical) {
         return C2D_Color32(220, 35, 15, alpha);
     }
-    return C2D_Color32(255, 125, 0, alpha);
+    return C2D_Color32(245, 175, 25, alpha);
 }
 
 static void ensureValidSelection(void) {
@@ -312,29 +313,24 @@ void timelineUpdate(void) {
 }
 
 static void drawLeftColumnGlyphs(void) {
+    bool hasSprites = assetsHasUiSheet();
+
     for (int g = 0; g < 5; g++) {
         float gx = GLYPH_COL_X;
         float gy = GLYPH_START_Y + (float)g * GLYPH_STEP_Y;
+
+        if (hasSprites) {
+            C2D_Image glyphImg = assetsGetUiImage((UiSpriteId)(UI_SPRITE_GLYPH_1 + g));
+            if (glyphImg.tex != NULL) {
+                C2D_DrawImageAt(glyphImg, gx, gy, 0.0f, NULL, 1.0f, 1.0f);
+                continue;
+            }
+        }
+
+        // Fallback seguro si el spritesheet no cargo
         float gs = GLYPH_BOX_SIZE;
         u32 col = COLOR_BRANCH_AMBER;
-        u32 dim = COLOR_AMBER_DIM;
-
         drawBoxOutline(gx, gy, gs, gs, 1.2f, col);
-
-        if (g == 0) {
-            C2D_DrawLine(gx + 2.0f, gy + 5.0f, col, gx + 8.0f, gy + 5.0f, col, 1.0f, 0.0f);
-            C2D_DrawLine(gx + 5.0f, gy + 2.0f, col, gx + 5.0f, gy + 8.0f, col, 1.0f, 0.0f);
-        } else if (g == 1) {
-            C2D_DrawRectSolid(gx + 3.0f, gy + 3.0f, 0.0f, 4.0f, 4.0f, col);
-        } else if (g == 2) {
-            C2D_DrawLine(gx + 2.0f, gy + 8.0f, col, gx + 8.0f, gy + 2.0f, col, 1.2f, 0.0f);
-        } else if (g == 3) {
-            C2D_DrawLine(gx + 2.0f, gy + 3.5f, col, gx + 8.0f, gy + 3.5f, col, 1.0f, 0.0f);
-            C2D_DrawLine(gx + 2.0f, gy + 6.5f, dim, gx + 8.0f, gy + 6.5f, dim, 1.0f, 0.0f);
-        } else {
-            C2D_DrawLine(gx + 5.0f, gy + 1.0f, col, gx + 5.0f, gy + 9.0f, col, 1.0f, 0.0f);
-            C2D_DrawRectSolid(gx + 2.0f, gy + 3.0f, 0.0f, 2.0f, 4.0f, dim);
-        }
     }
 }
 
@@ -361,22 +357,22 @@ static void drawMonitorScaleNumbers(C2D_TextBuf textBufDynamic) {
 }
 
 // ---------------------------------------------------------
-// Placeholder del Logo TVA (Listo para reemplazar por textura romfs:/gfx/tva_logo.t3x)
+// Logo TVA (Sprite pre-coloreado en naranja TVA, sin tinte por hardware)
 // ---------------------------------------------------------
 static void drawTvaLogoPlaceholder(C2D_TextBuf textBufDynamic, float x, float y, float w, float h) {
-    // NOTA FUTURA: Cuando se cargue el sprite "romfs:/gfx/tva_logo.t3x",
-    // reemplazar el interior de esta funcion por C2D_DrawImageAt(g_tvaLogoImg, x, y, 0.0f, NULL, 1.0f, 1.0f);
+    if (assetsHasUiSheet()) {
+        C2D_Image logoImg = assetsGetUiImage(UI_SPRITE_TVA_LOGO);
+        if (logoImg.tex != NULL) {
+            C2D_DrawImageAt(logoImg, x, y, 0.0f, NULL, 1.0f, 1.0f);
+            return;
+        }
+    }
 
-    // Bloque relleno marron/ambar muy oscuro sin borde amarillo brillante
+    // Fallback seguro si el spritesheet no cargo
     C2D_DrawRectSolid(x, y, 0.0f, w, h, COLOR_TVA_LOGO_BG);
-
-    // Letras grandes y gruesas "TVA" en ambar/naranja oscuro adentro (z = 0.0f)
     C2D_Text txtLogo;
     tempadParseText(&txtLogo, textBufDynamic, "TVA");
-    float centerX = x + (w * 0.5f);
-    float textY = y + 2.0f;
-
-    C2D_DrawText(&txtLogo, C2D_WithColor | C2D_AlignCenter, centerX, textY, 0.0f,
+    C2D_DrawText(&txtLogo, C2D_WithColor | C2D_AlignCenter, x + (w * 0.5f), y + 2.0f, 0.0f,
                  SCALE_TVA_LOGO_X, SCALE_TVA_LOGO_Y, COLOR_TVA_LOGO_TEXT);
 }
 
@@ -384,75 +380,75 @@ static void drawTvaLogoPlaceholder(C2D_TextBuf textBufDynamic, float x, float y,
 // FUNCION EDITABLE A MANO: MARCOS PRINCIPALES Y CAJAS DE VARIANTE
 // =============================================================================
 // Edita aqui directamente las coordenadas (x1, y1) -> (x2, y2) del Segundo
-// Rectangulo Grande, de las 4 Cajas de la Variante y del Placeholder de la TVA.
+// Rectangulo Grande, de las 4 Cajas de la Variante y del Logo de la TVA.
 // =============================================================================
-static void drawTopScreenMainFrames(C2D_TextBuf textBufDynamic, const VariantProfile* selVar, bool selCritical, u32 outerFrameCol) {
-    u32 frameCol = COLOR_BRANCH_AMBER;
+static void drawTopScreenMainFrames(C2D_TextBuf textBufDynamic, const VariantProfile* selVar, int selVarIdx, bool selCritical, u32 outerFrameCol) {
+    u32 frameCol = COLOR_TVA_ORANGE;
 
     // -------------------------------------------------------------------------
-    // A. CAJAS DE LA VARIANTE ADENTRO DEL SEGUNDO RECTANGULO (x = 297, w = 89)
-    //    Quedan con 3px de margen respecto al techo (y = 10) y 4px respecto a
-    //    la pared derecha (x = 390), con 2px de espacio vertical entre cajas.
+    // A. CAJAS DE LA VARIANTE ADENTRO DEL SEGUNDO RECTANGULO (x = 287, w = 99)
+    //    CONFIRM IDENTITY y Nombre sin fondo opaco para que la grilla pase detras.
     // -------------------------------------------------------------------------
 
-    // 1. Caja 1 ("CONFIRM IDENTITY"): x = 297, y = 13, w = 89, h = 15
-    const float box1X = 297.0f, box1Y = 13.0f, box1W = 89.0f, box1H = 15.0f;
-    C2D_DrawRectSolid(box1X, box1Y, 0.0f, box1W, box1H, COLOR_BG_DARK);
+    // 1. Caja 1 ("CONFIRM IDENTITY"): x = 287, y = 13, w = 99, h = 15 (transparente)
+    const float box1X = 287.0f, box1Y = 13.0f, box1W = 99.0f, box1H = 15.0f;
     drawBoxOutline(box1X, box1Y, box1W, box1H, THICK_CARD_BORDER, frameCol);
 
     C2D_Text txtConfirm;
     tempadParseText(&txtConfirm, textBufDynamic, "CONFIRM IDENTITY");
     C2D_DrawText(&txtConfirm, C2D_WithColor | C2D_AlignCenter,
-                 box1X + (box1W * 0.5f), box1Y + 1.0f, 0.0f,
+                 box1X + (box1W * 0.5f), box1Y + 0.5f, 0.0f,
                  SCALE_IDENTITY_HEADER_X, SCALE_IDENTITY_HEADER_Y, frameCol);
 
-    // 2. Caja 2 (Visor de Foto): x = 297, y = 30, w = 89, h = 104
-    const float box2X = 297.0f, box2Y = 30.0f, box2W = 89.0f, box2H = 104.0f;
-    C2D_DrawRectSolid(box2X, box2Y, 0.0f, box2W, box2H, COLOR_BG_DARK);
-    drawBoxOutline(box2X, box2Y, box2W, box2H, THICK_CARD_BORDER, frameCol);
-
-    u32 mugCol = selVar ? (selCritical ? COLOR_BRANCH_RED : COLOR_AMBER_TEXT) : COLOR_AMBER_DIM;
-    u32 silFill = selVar ? C2D_Color32(95, 55, 14, 180) : C2D_Color32(35, 22, 10, 140);
+    // 2. Caja 2 (Visor de Foto): x = 287, y = 30, w = 99, h = 104
+    const float box2X = 287.0f, box2Y = 30.0f, box2W = 99.0f, box2H = 104.0f;
     float cardCenterX = box2X + (box2W * 0.5f);
 
-    C2D_Text txtPhotoTag;
-    tempadParseText(&txtPhotoTag, textBufDynamic, "[ PHOTO ]");
-    C2D_DrawText(&txtPhotoTag, C2D_WithColor | C2D_AlignCenter,
-                 cardCenterX, box2Y + 5.0f, 0.0f,
-                 SCALE_IDENTITY_PHOTO_TAG, SCALE_IDENTITY_PHOTO_TAG, mugCol);
+    if (selVar != NULL && selVarIdx >= 0 && assetsHasVariantSheet()) {
+        C2D_Image varImg = assetsGetVariantImage(selVarIdx);
+        if (varImg.tex != NULL) {
+            // Centrar la foto de 94x98 px limpiamente dentro del borde de 99x104 px
+            float imgX = box2X + (box2W - (float)varImg.subtex->width) * 0.5f;
+            float imgY = box2Y + (box2H - (float)varImg.subtex->height) * 0.5f;
+            C2D_DrawImageAt(varImg, imgX, imgY, 0.0f, NULL, 1.0f, 1.0f);
+        }
+    } else if (selVar != NULL && !assetsHasVariantSheet()) {
+        // Fallback seguro unicamente si romfs:/gfx/variants.t3x no cargo
+        u32 mugCol = selCritical ? COLOR_BRANCH_RED : COLOR_AMBER_TEXT;
+        C2D_Text txtNoImg;
+        tempadParseText(&txtNoImg, textBufDynamic, "NO FEED");
+        C2D_DrawText(&txtNoImg, C2D_WithColor | C2D_AlignCenter,
+                     cardCenterX, box2Y + 44.0f, 0.0f,
+                     SCALE_IDENTITY_PHOTO_TAG, SCALE_IDENTITY_PHOTO_TAG, mugCol);
+    }
 
-    // Silueta fija dentro de Caja 2 (cabeza + hombros)
-    float headW = 24.0f, headH = 25.0f;
-    float headX = cardCenterX - (headW * 0.5f);
-    float headY = box2Y + 28.0f;
-    C2D_DrawRectSolid(headX, headY, 0.0f, headW, headH, silFill);
-    drawBoxOutline(headX, headY, headW, headH, 1.0f, mugCol);
+    drawBoxOutline(box2X, box2Y, box2W, box2H, THICK_CARD_BORDER, selCritical ? COLOR_BRANCH_RED : frameCol);
 
-    float shW = 50.0f, shH = 26.0f;
-    float shX = cardCenterX - (shW * 0.5f);
-    float shY = headY + headH + 4.0f;
-    C2D_DrawRectSolid(shX, shY, 0.0f, shW, shH, silFill);
-    drawBoxOutline(shX, shY, shW, shH, 1.0f, mugCol);
-
-    // 3. Caja 3 (Nombre de Variante): x = 297, y = 136, w = 89, h = 20
-    const float box3X = 297.0f, box3Y = 136.0f, box3W = 89.0f, box3H = 20.0f;
-    C2D_DrawRectSolid(box3X, box3Y, 0.0f, box3W, box3H, COLOR_BG_DARK);
+    // 3. Caja 3 (Nombre de Variante): x = 287, y = 136, w = 99, h = 20 (transparente)
+    const float box3X = 287.0f, box3Y = 136.0f, box3W = 99.0f, box3H = 20.0f;
     drawBoxOutline(box3X, box3Y, box3W, box3H, THICK_CARD_BORDER, frameCol);
 
     const char* varName = selVar ? selVar->name : "NO VARIANT";
     size_t nameLen = strlen(varName);
-    float nameScaleX = (nameLen > 12) ? (81.0f / ((float)nameLen * 17.0f)) : 0.34f;
-    u32 nameCol = selVar ? COLOR_BRANCH_SELECTED : COLOR_AMBER_DIM;
+    float nameScaleY = SCALE_IDENTITY_NAME_Y;
+    float nameScaleX = 0.52f;
+    if ((float)nameLen * 13.0f * nameScaleX > 93.0f) {
+        nameScaleX = 93.0f / ((float)nameLen * 13.0f);
+        if (nameScaleX < 0.85f * nameScaleY) {
+            nameScaleY = nameScaleX / 0.85f;
+        }
+    }
+    u32 nameCol = selVar ? COLOR_TVA_ORANGE : COLOR_AMBER_DIM;
 
     C2D_Text txtVarName;
     tempadParseText(&txtVarName, textBufDynamic, varName);
     C2D_DrawText(&txtVarName, C2D_WithColor | C2D_AlignCenter,
-                 cardCenterX, box3Y + 2.5f, 0.0f,
-                 nameScaleX, SCALE_IDENTITY_NAME_Y, nameCol);
+                 cardCenterX, box3Y + 2.0f, 0.0f,
+                 nameScaleX, nameScaleY, nameCol);
 
-    // 4. Caja 4 (Etiqueta "VARIANT# XXXX"): x = 297, y = 158, w = 89, h = 20
-    const float box4X = 297.0f, box4Y = 158.0f, box4W = 89.0f, box4H = 20.0f;
-    u32 badgeBg = selVar ? COLOR_BRANCH_AMBER : COLOR_BTN_NORMAL;
+    // 4. Caja 4 (Etiqueta "VARIANT# XXXX"): x = 287, y = 158, w = 99, h = 20
+    const float box4X = 287.0f, box4Y = 158.0f, box4W = 99.0f, box4H = 20.0f;
+    u32 badgeBg = selVar ? COLOR_TVA_ORANGE : COLOR_BTN_NORMAL;
     u32 badgeTxt = selVar ? COLOR_TEXT_INVERTED : COLOR_AMBER_DIM;
 
     C2D_DrawRectSolid(box4X, box4Y, 0.0f, box4W, box4H, badgeBg);
@@ -464,20 +460,20 @@ static void drawTopScreenMainFrames(C2D_TextBuf textBufDynamic, const VariantPro
     C2D_Text txtBadge;
     tempadParseText(&txtBadge, textBufDynamic, badgeStr);
     C2D_DrawText(&txtBadge, C2D_WithColor | C2D_AlignCenter,
-                 cardCenterX, box4Y + 2.5f, 0.0f,
+                 cardCenterX, box4Y + 2.0f, 0.0f,
                  SCALE_IDENTITY_BADGE_X, SCALE_IDENTITY_BADGE_Y, badgeTxt);
 
     // -------------------------------------------------------------------------
-    // B. CAJA DEL PLACEHOLDER DEL LOGO TVA: x = 360, y = 195, w = 30, h = 21
-    //    Esquina superior derecha: (390, 195)
-    //    Esquina inferior izquierda: (360, 216)
+    // B. SPRITE DEL LOGO TVA: x = 346, y = 196, w = 44, h = 20
+    //    Esquina superior derecha: (390, 196)
+    //    Esquina inferior izquierda: (346, 216)
     // -------------------------------------------------------------------------
-    drawTvaLogoPlaceholder(textBufDynamic, 360.0f, 195.0f, 30.0f, 21.0f);
+    drawTvaLogoPlaceholder(textBufDynamic, CARD_TVA_LOGO_X, CARD_TVA_LOGO_Y, CARD_TVA_LOGO_W, CARD_TVA_LOGO_H);
 
     // -------------------------------------------------------------------------
     // C. LINEAS DEL SEGUNDO RECTANGULO GRANDE (x = 26, y = 10 -> x = 390, y = 216)
     //    Engloba tanto el monitor como las cajas de la variante y corta al
-    //    chocar con la caja del placeholder de la TVA:
+    //    chocar con el sprite del logo de la TVA:
     // -------------------------------------------------------------------------
     // 1. Linea Superior: desde (26, 10) hasta el fondo a la derecha en (390, 10)
     C2D_DrawLine(26.0f, 10.0f, frameCol, 390.0f, 10.0f, frameCol, THICK_INNER_FRAME, 0.0f);
@@ -485,11 +481,11 @@ static void drawTopScreenMainFrames(C2D_TextBuf textBufDynamic, const VariantPro
     // 2. Linea Izquierda: desde (26, 10) hasta (26, 216)
     C2D_DrawLine(26.0f, 10.0f, frameCol, 26.0f, 216.0f, frameCol, THICK_INNER_FRAME, 0.0f);
 
-    // 3. Linea Derecha: baja desde (390, 10) y FRENA/CORTA en (390, 186) (esquina sup-der de TVA)
-    C2D_DrawLine(390.0f, 10.0f, frameCol, 390.0f, 195.0f, frameCol, THICK_INNER_FRAME, 0.0f);
+    // 3. Linea Derecha: baja desde (390, 10) y corta justo encima del logo TVA en (390, 193)
+    C2D_DrawLine(390.0f, 10.0f, frameCol, 390.0f, 193.0f, frameCol, THICK_INNER_FRAME, 0.0f);
 
-    // 4. Linea Inferior: va desde (26, 216) y FRENA/CORTA en (297, 216) (esquina inf-izq de TVA)
-    C2D_DrawLine(26.0f, 216.0f, frameCol, 360.0f, 216.0f, frameCol, THICK_INNER_FRAME, 0.0f);
+    // 4. Linea Inferior: va desde (26, 216) y corta justo antes del logo TVA en (343, 216)
+    C2D_DrawLine(26.0f, 216.0f, frameCol, 343.0f, 216.0f, frameCol, THICK_INNER_FRAME, 0.0f);
 
     // -------------------------------------------------------------------------
     // D. RECTANGULO 1 (MARCO EXTERIOR GIGANTE): x = 4, y = 4, w = 392, h = 232
@@ -499,22 +495,75 @@ static void drawTopScreenMainFrames(C2D_TextBuf textBufDynamic, const VariantPro
 
 void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDynamic, AppState currentState, const char* activeLocationName) {
     (void)activeLocationName;
+
+    // Pre-evaluar estado de alertas sobre ramas activas
+    int criticalCount = 0;
+    bool anyUnderThreeUnits = false;
+    for (int i = 0; i < MAX_BRANCHES; i++) {
+        if (!s_branches[i].active || s_branches[i].current_length <= 0.05f) continue;
+        if (s_branches[i].is_critical) criticalCount++;
+        if (s_branches[i].units_remaining < BRANCH_REDLINE_ALERT_UNITS) anyUnderThreeUnits = true;
+    }
+
+    // =========================================================
+    // CAPA 1: Fondo negro (#080400)
+    // =========================================================
     C2D_TargetClear(topScreen, COLOR_BG_DARK);
     C2D_SceneBegin(topScreen);
 
     // =========================================================
-    // CAPA 1 (FONDO): Grilla del Monitor, Umbrales, Ramas y Marquesina (todo en z = 0.0f)
+    // CAPA 2: Marquesina "REDLINE IMMINENT" + mascaras negras SOLO en franja superior (y = 10..32)
     // =========================================================
-    C2D_DrawRectSolid(GRAPH_BOX_X, GRAPH_BOX_Y, 0.0f, GRAPH_BOX_W, GRAPH_BOX_H, COLOR_PANEL_INSET);
+    bool blinkMultiverse = false;
+    if (criticalCount >= 3) {
+        blinkMultiverse = (((int)(s_timelinePhase * 3.0f)) % 2 == 0);
+        if (blinkMultiverse) {
+            C2D_Text txtDanger;
+            tempadParseText(&txtDanger, textBufDynamic, "DANGER: MULTIVERSE");
+            C2D_DrawText(&txtDanger, C2D_WithColor | C2D_AlignCenter,
+                         GRAPH_BOX_X + (GRAPH_BOX_W * 0.5f), GRAPH_BOX_Y + 7.0f, 0.0f,
+                         SCALE_REDLINE_ALERT_X, SCALE_REDLINE_ALERT_Y, COLOR_BRANCH_RED);
+        }
+    } else if (anyUnderThreeUnits) {
+        const char* singleUnitStr = "REDLINE IMMINENT     ";
+        C2D_Text txtUnit;
+        tempadParseText(&txtUnit, textBufDynamic, singleUnitStr);
 
-    for (float x = GRAPH_BOX_X + 34.0f; x < GRAPH_RIGHT_X; x += 34.0f) {
-        C2D_DrawLine(x, GRAPH_BOX_Y + 1.0f, COLOR_GRID_LINE, x, GRAPH_BOTTOM_Y - 1.0f, COLOR_GRID_LINE, THICK_GRID_LINE, 0.0f);
-    }
-    for (float y = GRAPH_BOX_Y + 34.0f; y < GRAPH_BOTTOM_Y; y += 34.0f) {
-        C2D_DrawLine(GRAPH_BOX_X + 1.0f, y, COLOR_GRID_LINE, GRAPH_RIGHT_X - 1.0f, y, COLOR_GRID_LINE, THICK_GRID_LINE, 0.0f);
+        float unitWidth = 0.0f, unitHeight = 0.0f;
+        C2D_TextGetDimensions(&txtUnit, SCALE_REDLINE_ALERT_X, SCALE_REDLINE_ALERT_Y, &unitWidth, &unitHeight);
+        if (unitWidth < 20.0f) {
+            unitWidth = 21.0f * 13.0f * SCALE_REDLINE_ALERT_X;
+        }
+
+        while (s_marqueeX <= -unitWidth) {
+            s_marqueeX += unitWidth;
+        }
+
+        for (int rep = 0; rep < 4; rep++) {
+            float drawX = 28.0f + s_marqueeX + ((float)rep * unitWidth);
+            C2D_DrawText(&txtUnit, C2D_WithColor, drawX, 11.5f, 0.0f,
+                         SCALE_REDLINE_ALERT_X, SCALE_REDLINE_ALERT_Y, COLOR_BRANCH_RED);
+        }
+
+        // Mascaras negras estrictas unicamente en la franja superior (y = 10..32)
+        C2D_DrawRectSolid(0.0f, 10.0f, 0.0f, GRAPH_BOX_X, 22.0f, COLOR_BG_DARK);
+        C2D_DrawRectSolid(GRAPH_RIGHT_X, 10.0f, 0.0f, TOP_WIDTH - GRAPH_RIGHT_X, 22.0f, COLOR_BG_DARK);
     }
 
-    // Solid, Continuous, Thick Red Threshold Lines across the graph width (x = 26..293)
+    // =========================================================
+    // CAPA 3: Grilla completa sobre todo el interior del Rectangulo 1 (4..396 x 4..236)
+    // =========================================================
+    for (float x = OUTER_FRAME_X + 22.0f; x < (OUTER_FRAME_X + OUTER_FRAME_W); x += 28.0f) {
+        C2D_DrawLine(x, OUTER_FRAME_Y + 1.0f, COLOR_GRID_LINE, x, OUTER_FRAME_Y + OUTER_FRAME_H - 1.0f, COLOR_GRID_LINE, THICK_GRID_LINE, 0.0f);
+    }
+    for (float y = OUTER_FRAME_Y + 20.0f; y < (OUTER_FRAME_Y + OUTER_FRAME_H); y += 28.0f) {
+        C2D_DrawLine(OUTER_FRAME_X + 1.0f, y, COLOR_GRID_LINE, OUTER_FRAME_X + OUTER_FRAME_W - 1.0f, y, COLOR_GRID_LINE, THICK_GRID_LINE, 0.0f);
+    }
+
+    // =========================================================
+    // CAPA 4: Lineas rojas, ramas, Sagrada Linea Temporal, reticula '[ ]' y telemetria
+    // =========================================================
+    // Solid, Continuous, Thick Red Threshold Lines across the graph width (x = 26..284)
     C2D_DrawLine(GRAPH_BOX_X + 1.0f, TIMELINE_THRESHOLD_TOP, COLOR_REDLINE_SOLID,
                  GRAPH_RIGHT_X, TIMELINE_THRESHOLD_TOP, COLOR_REDLINE_SOLID, THICK_THRESHOLD_LINE, 0.0f);
     C2D_DrawLine(GRAPH_BOX_X + 1.0f, TIMELINE_THRESHOLD_BOTTOM, COLOR_REDLINE_SOLID,
@@ -523,28 +572,18 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
     // Clean Scale Numbers ("02", "03", "04" only, no "00")
     drawMonitorScaleNumbers(textBufDynamic);
 
-    // Decorative Bottom-Left Grid Telemetry (x = 29, y = 198 / 206)
+    // Decorative Bottom-Left Grid Telemetry (shortened to "MAG" and "SEG" for larger crisp font)
     C2D_Text txtMag, txtSeg;
-    tempadParseText(&txtMag, textBufDynamic, "TIMELINE MAG: 70.62.0738");
+    tempadParseText(&txtMag, textBufDynamic, "MAG: 70.62.0738");
     C2D_DrawText(&txtMag, C2D_WithColor, GRID_DECOR_X, GRID_DECOR_MAG_Y, 0.0f, SCALE_GRID_DECOR, SCALE_GRID_DECOR, COLOR_AMBER_DIM);
 
-    tempadParseText(&txtSeg, textBufDynamic, "TIMELINE SEGMENT: 616.432");
+    tempadParseText(&txtSeg, textBufDynamic, "SEG: 616.432");
     C2D_DrawText(&txtSeg, C2D_WithColor, GRID_DECOR_X, GRID_DECOR_SEG_Y, 0.0f, SCALE_GRID_DECOR, SCALE_GRID_DECOR, COLOR_AMBER_DIM);
 
     // Variant Branches & Clamped '[ ]' Reticle
-    int criticalCount = 0;
-    bool anyUnderThreeUnits = false;
-
     for (int i = 0; i < MAX_BRANCHES; i++) {
         TimelineBranch* br = &s_branches[i];
         if (!br->active || br->current_length <= 0.05f) continue;
-
-        if (br->is_critical) {
-            criticalCount++;
-        }
-        if (br->units_remaining < BRANCH_REDLINE_ALERT_UNITS) {
-            anyUnderThreeUnits = true;
-        }
 
         bool isSelected = (i == s_selected_branch_index);
         float baseCoreThick = isSelected ? THICK_BRANCH_SEL_CORE : THICK_BRANCH_CORE;
@@ -605,7 +644,7 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
             if (tipY < RETICLE_CLAMP_MIN_Y) tipY = RETICLE_CLAMP_MIN_Y;
             if (tipY > RETICLE_CLAMP_MAX_Y) tipY = RETICLE_CLAMP_MAX_Y;
 
-            u32 retCol = br->is_critical ? COLOR_BRANCH_RED : COLOR_BRANCH_SELECTED;
+            u32 retCol = br->is_critical ? COLOR_BRANCH_RED : COLOR_BRANCH_GOLD_SEL;
             float r = RETICLE_HALF_SIZE;
             float arm = RETICLE_ARM_LEN;
             float rt = RETICLE_THICKNESS;
@@ -621,7 +660,7 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
         }
     }
 
-    // Sacred Timeline (Muted Silver / Gray across Monitor x = 26..293)
+    // Sacred Timeline (Muted Silver / Gray across Monitor x = 26..284)
     float prevX = GRAPH_BOX_X + 2.0f;
     float prevY = getSacredTimelineY(prevX, s_timelinePhase);
 
@@ -642,7 +681,7 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
     if (s_selected_branch_index >= 0 && s_branches[s_selected_branch_index].active) {
         TimelineBranch* selBr = &s_branches[s_selected_branch_index];
         displayUnits = selBr->units_remaining;
-        unitsCol = selBr->is_critical ? COLOR_BRANCH_RED : COLOR_BRANCH_AMBER;
+        unitsCol = selBr->is_critical ? COLOR_BRANCH_RED : COLOR_TVA_ORANGE;
     }
 
     char unitsBuf[16];
@@ -657,39 +696,6 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
     C2D_DrawText(&txtUnitsLbl, C2D_WithColor, GRAPH_BOX_X + 6.0f, TIMELINE_THRESHOLD_TOP + 26.0f, 0.0f,
                  SCALE_UNITS_LABEL, SCALE_UNITS_LABEL, unitsCol);
 
-    // Exclusive Alert Logic in Upper Strip (y = 10..44) drawn at z = 0.0f BEFORE side columns
-    bool blinkMultiverse = false;
-    if (criticalCount >= 3) {
-        blinkMultiverse = (((int)(s_timelinePhase * 3.0f)) % 2 == 0);
-        if (blinkMultiverse) {
-            C2D_Text txtDanger;
-            tempadParseText(&txtDanger, textBufDynamic, "DANGER: MULTIVERSE");
-            C2D_DrawText(&txtDanger, C2D_WithColor | C2D_AlignCenter,
-                         GRAPH_BOX_X + (GRAPH_BOX_W * 0.5f), GRAPH_BOX_Y + 7.0f, 0.0f,
-                         SCALE_REDLINE_ALERT_X, SCALE_REDLINE_ALERT_Y, COLOR_BRANCH_RED);
-        }
-    } else if (anyUnderThreeUnits) {
-        const char* singleUnitStr = "REDLINE IMMINENT     ";
-        C2D_Text txtUnit;
-        tempadParseText(&txtUnit, textBufDynamic, singleUnitStr);
-
-        float unitWidth = 0.0f, unitHeight = 0.0f;
-        C2D_TextGetDimensions(&txtUnit, SCALE_REDLINE_ALERT_X, SCALE_REDLINE_ALERT_Y, &unitWidth, &unitHeight);
-        if (unitWidth < 20.0f) {
-            unitWidth = 21.0f * 17.0f * SCALE_REDLINE_ALERT_X;
-        }
-
-        while (s_marqueeX <= -unitWidth) {
-            s_marqueeX += unitWidth;
-        }
-
-        for (int rep = 0; rep < 4; rep++) {
-            float drawX = 28.0f + s_marqueeX + ((float)rep * unitWidth);
-            C2D_DrawText(&txtUnit, C2D_WithColor, drawX, 11.5f, 0.0f,
-                         SCALE_REDLINE_ALERT_X, SCALE_REDLINE_ALERT_Y, COLOR_BRANCH_RED);
-        }
-    }
-
     // Visual Timedoor Breach when Active
     if (currentState == STATE_TIMEDOOR_ACTIVE) {
         float breachX = GRAPH_BOX_X + (GRAPH_BOX_W * 0.5f);
@@ -699,19 +705,11 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
         C2D_DrawLine(breachX, 54.0f, COLOR_BRANCH_SELECTED, breachX, 172.0f, COLOR_BRANCH_SELECTED, 2.0f, 0.0f);
 
         float ringRadius = 13.0f + pulse;
-        drawBoxOutline(breachX - ringRadius, TIMELINE_BASELINE_Y - ringRadius, ringRadius * 2.0f, ringRadius * 2.0f, 1.5f, COLOR_BRANCH_AMBER);
+        drawBoxOutline(breachX - ringRadius, TIMELINE_BASELINE_Y - ringRadius, ringRadius * 2.0f, ringRadius * 2.0f, 1.5f, COLOR_TVA_ORANGE);
     }
 
     // =========================================================
-    // CAPA 2 (COLUMNAS LATERALES OPACAS): Tapan todo lo que salga del grafico
-    // =========================================================
-    // Columna izquierda (donde van los glifos): x = 0..26, y = 0..240
-    C2D_DrawRectSolid(0.0f, 0.0f, 0.0f, 26.0f, 240.0f, COLOR_BG_DARK);
-    // Columna derecha (donde van las cajas de la variante): x = 293..400, y = 0..240
-    C2D_DrawRectSolid(293.0f, 0.0f, 0.0f, 107.0f, 240.0f, COLOR_BG_DARK);
-
-    // =========================================================
-    // CAPA 3 (FRENTE): Glifos, Cajas de Variante, Marcos Naranjas y Telemetria Inferior
+    // CAPA 5: Glifos, Cajas de Variante, Foto, Barra VARIANT#, Logo TVA, Marcos y Telemetria Inferior
     // =========================================================
     const VariantProfile* selVar = timelineGetSelectedVariant();
     TimelineBranch* selBr = (s_selected_branch_index >= 0 && s_branches[s_selected_branch_index].active)
@@ -721,17 +719,18 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
     // 5 Glifos de la columna izquierda
     drawLeftColumnGlyphs();
 
-    // Cajas de la variante + Placeholder TVA + Segundo Rectangulo que corta en TVA + Marco Exterior
-    u32 outerFrameCol = (criticalCount >= 3 && blinkMultiverse) ? COLOR_BRANCH_RED : COLOR_BRANCH_AMBER;
-    drawTopScreenMainFrames(textBufDynamic, selVar, selCritical, outerFrameCol);
+    // Cajas de la variante + Logo TVA + Segundo Rectangulo que corta en TVA + Marco Exterior
+    int selVarIdx = (selBr != NULL) ? selBr->variant_index : -1;
+    u32 outerFrameCol = (criticalCount >= 3 && blinkMultiverse) ? COLOR_BRANCH_RED : COLOR_TVA_ORANGE;
+    drawTopScreenMainFrames(textBufDynamic, selVar, selVarIdx, selCritical, outerFrameCol);
 
     // Barra inferior de Fecha, Coordenadas y Energia (z = 0.0f)
     const char* dateStr = selVar ? selVar->date_str : "--.--.----";
     const char* coordsStr = selVar ? selVar->coords_str : "0000.000 // 0000.000";
-    u32 telemCol = selVar ? COLOR_BRANCH_AMBER : COLOR_AMBER_DIM;
+    u32 telemCol = selVar ? COLOR_TVA_ORANGE : COLOR_AMBER_DIM;
 
     char terminalLine[64];
-    snprintf(terminalLine, sizeof(terminalLine), "%s     %s", dateStr, coordsStr);
+    snprintf(terminalLine, sizeof(terminalLine), "%s   %s", dateStr, coordsStr);
 
     C2D_Text txtTerminal;
     tempadParseText(&txtTerminal, textBufDynamic, terminalLine);

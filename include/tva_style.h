@@ -20,32 +20,39 @@
 #define BOTTOM_HEIGHT                   240
 
 // -----------------------------------------------------------------------------
-// 2. PALETA DE COLORES CANONICA DE LA TVA (RGBA: 0..255)
+// 2. PALETA OFICIAL NARANJA TVA (FIGMA — RGBA: 0..255)
 // -----------------------------------------------------------------------------
 // Fondos y Paneles CRT
-#define COLOR_BG_DARK                   C2D_Color32(12, 8, 4, 255)
-#define COLOR_PANEL_BG                  C2D_Color32(22, 15, 9, 255)
-#define COLOR_PANEL_INSET               C2D_Color32(14, 9, 5, 255)
-#define COLOR_BORDER_DIM                C2D_Color32(65, 40, 16, 255)
-#define COLOR_BORDER_MID                C2D_Color32(135, 82, 28, 255)
-#define COLOR_GRID_LINE                 C2D_Color32(42, 26, 10, 150)
+#define COLOR_BG_DARK                   C2D_Color32(8, 4, 0, 255)        // #080400 Fondo general
+#define COLOR_PANEL_BG                  C2D_Color32(28, 13, 3, 220)
+#define COLOR_PANEL_INSET               C2D_Color32(14, 7, 1, 210)
+#define COLOR_BORDER_DIM                C2D_Color32(115, 58, 12, 255)    // Naranja apagado / tenue
+#define COLOR_BORDER_MID                C2D_Color32(200, 98, 16, 255)    // #C86210 Naranja medio
+#define COLOR_GRID_LINE                 C2D_Color32(95, 44, 8, 85)       // Grilla sutil naranja
 
-// Bloque Placeholder del Logo TVA (Marron / Ambar muy oscuro sin borde brillante)
-#define COLOR_TVA_LOGO_BG               C2D_Color32(35, 18, 4, 255)
-#define COLOR_TVA_LOGO_TEXT             C2D_Color32(175, 95, 22, 255)
+// Logo TVA (tinte configurable sobre sprite blanco puro)
+#define COLOR_TVA_LOGO                  C2D_Color32(215, 102, 18, 255)
+#define COLOR_TVA_LOGO_BG               C2D_Color32(35, 16, 4, 255)
+#define COLOR_TVA_LOGO_TEXT             C2D_Color32(215, 102, 18, 255)
 
 // Sagrada Linea Temporal (Gris / Plateado Apagado)
 #define COLOR_SACRED_CORE               C2D_Color32(175, 180, 190, 255)
 #define COLOR_SACRED_GLOW               C2D_Color32(100, 105, 115, 180)
 #define COLOR_SACRED_MAIN               C2D_Color32(150, 155, 165, 255)
 
-// Ramificaciones y UI Ambar / Naranja TVA
-#define COLOR_BRANCH_AMBER              C2D_Color32(255, 190, 40, 255)
-#define COLOR_BRANCH_SELECTED           C2D_Color32(255, 245, 190, 255)
-#define COLOR_BRANCH_AMBER_GLOW         C2D_Color32(255, 125, 0, 110)
-#define COLOR_AMBER_TEXT                C2D_Color32(255, 178, 38, 255)
-#define COLOR_AMBER_DIM                 C2D_Color32(130, 72, 18, 255)
-#define COLOR_TEXT_INVERTED             C2D_Color32(18, 10, 4, 255)
+// Ramificaciones Variantes (Amarillo / Dorado brillante para contrastar con la UI naranja)
+#define COLOR_BRANCH_GOLD_CORE          C2D_Color32(255, 140, 0, 255)   // Nucleo de rama variante
+#define COLOR_BRANCH_GOLD_SEL           C2D_Color32(255, 240, 145, 255)  // Nucleo de rama seleccionada
+#define COLOR_BRANCH_GOLD_GLOW          C2D_Color32(245, 175, 25, 255)   // Brillo / borde dorado
+
+// UI Naranja TVA Oficial (#F57E16)
+#define COLOR_TVA_ORANGE                C2D_Color32(245, 126, 22, 255)   // #F57E16 Naranja principal vivo
+#define COLOR_BRANCH_AMBER              COLOR_TVA_ORANGE
+#define COLOR_BRANCH_SELECTED           C2D_Color32(255, 168, 72, 255)   // Naranja brillante de seleccion UI
+#define COLOR_BRANCH_AMBER_GLOW         C2D_Color32(245, 110, 12, 115)
+#define COLOR_AMBER_TEXT                COLOR_TVA_ORANGE
+#define COLOR_AMBER_DIM                 C2D_Color32(115, 58, 12, 255)    // Naranja apagado / tenue
+#define COLOR_TEXT_INVERTED             C2D_Color32(13, 8, 4, 255)       // #0D0804 Negro de contraste
 
 // Alerta Critica Nexus y Lineas de Umbral Rojas Solidas
 #define COLOR_BRANCH_RED                C2D_Color32(250, 48, 24, 255)
@@ -53,21 +60,33 @@
 #define COLOR_BRANCH_RED_GLOW           C2D_Color32(220, 35, 15, 130)
 #define COLOR_RED_DIM                   C2D_Color32(120, 20, 10, 255)
 
-// Botones del Panel Inferior
-#define COLOR_BTN_NORMAL                C2D_Color32(46, 28, 15, 255)
-#define COLOR_BTN_NORMAL_BORDER         C2D_Color32(140, 85, 25, 255)
-#define COLOR_BTN_PRESSED               C2D_Color32(255, 150, 10, 255)
-#define COLOR_BTN_PRESSED_BORDER        C2D_Color32(255, 225, 120, 255)
+// Botones del Panel Inferior (marron oscuro calido semitransparente para insinuar grilla)
+#define COLOR_BTN_NORMAL                C2D_Color32(44, 21, 5, 190)      // #2C1505 con leve transparencia
+#define COLOR_BTN_NORMAL_BORDER         C2D_Color32(200, 98, 16, 255)    // #C86210 Naranja medio
+#define COLOR_BTN_PRESSED               C2D_Color32(245, 126, 22, 255)   // #F57E16 Naranja vivo
+#define COLOR_BTN_PRESSED_BORDER        C2D_Color32(255, 168, 72, 255)
 
-#define COLOR_PURGE_BTN_NORMAL          C2D_Color32(65, 20, 14, 255)
-#define COLOR_PURGE_BTN_BORDER          C2D_Color32(180, 45, 20, 255)
+#define COLOR_PURGE_BTN_NORMAL          C2D_Color32(68, 18, 10, 200)
+#define COLOR_PURGE_BTN_BORDER          C2D_Color32(200, 48, 22, 255)
 #define COLOR_PURGE_BTN_PRESSED         C2D_Color32(245, 45, 25, 255)
+
+// Dashboard Flotante con Glow CRT (Sin cajas de botones)
+#define COLOR_DASH_DIM                  C2D_Color32(175, 82, 16, 255)    // Inactivo naranja apagado
+#define COLOR_DASH_GLOW_HALO            C2D_Color32(255, 115, 15, 70)    // Halo CRT ambar translucido
+#define COLOR_DASH_GLOW_CORE            C2D_Color32(255, 205, 95, 255)   // Nucleo texto brillante ambar
+#define COLOR_DASH_RED_DIM              C2D_Color32(170, 56, 32, 255)    // Accion critica inactiva
+#define COLOR_DASH_RED_HALO             C2D_Color32(255, 45, 20, 80)     // Halo CRT rojo translucido
+#define COLOR_DASH_RED_CORE             C2D_Color32(255, 105, 80, 255)   // Nucleo texto critico brillante
 
 // -----------------------------------------------------------------------------
 // 3. VELOCIDADES Y TIEMPOS DEL MONITOR TEMPORAL (60 FPS)
 // -----------------------------------------------------------------------------
-// Velocidad de ondulacion de la Sagrada Linea Temporal
-#define TIMELINE_WAVE_SPEED             0.040f
+// Flotacion sutil de la Sagrada Linea Temporal (editable a mano)
+// SACRED_WAVE_AMPLITUDE: amplitud vertical maxima en pixeles (~1.5f px)
+// SACRED_WAVE_SPEED: velocidad de desplazamiento por frame (0.5x mas calma)
+#define SACRED_WAVE_AMPLITUDE           1.50f
+#define SACRED_WAVE_SPEED               0.020f
+#define TIMELINE_WAVE_SPEED             SACRED_WAVE_SPEED
 
 // Intervalo de aparicion automatica de ramas: 1080 frames = ~18.0 segundos
 #define BRANCH_SPAWN_INTERVAL_FRAMES    1080
@@ -126,37 +145,37 @@
 #define SACRED_STEP_X                   4.0f
 
 // -----------------------------------------------------------------------------
-// 5. ESCALAS DE TEXTO (+2..3px DE ALTURA EN RESOLUCION NATIVA)
+// 5. ESCALAS DE TEXTO CALIBRADAS PARA FUENTE NATIVA 16PX (scaleX >= 0.85 * scaleY)
 // -----------------------------------------------------------------------------
 // Alerta superior dentro del monitor ("REDLINE IMMINENT" / "DANGER: MULTIVERSE")
-#define SCALE_REDLINE_ALERT_X           0.35f
-#define SCALE_REDLINE_ALERT_Y           0.40f
+#define SCALE_REDLINE_ALERT_X           0.56f
+#define SCALE_REDLINE_ALERT_Y           0.60f
 
 // Contador UNITS (Esquina superior izquierda debajo de la linea roja superior)
-#define SCALE_UNITS_VALUE               0.58f
-#define SCALE_UNITS_LABEL               0.35f
+#define SCALE_UNITS_VALUE               0.86f
+#define SCALE_UNITS_LABEL               0.54f
 
 // Numeros de escala vertical a la derecha de la grilla ("02", "03", "04")
-#define SCALE_GRID_AXIS_NUM             0.33f
+#define SCALE_GRID_AXIS_NUM             0.50f
 
-// Texto decorativo interno de la grilla (TIMELINE MAG / SEGMENT)
-#define SCALE_GRID_DECOR                0.28f
+// Texto decorativo interno de la grilla ("MAG: 70.62.0738" / "SEG: 616.432")
+#define SCALE_GRID_DECOR                0.48f
 
-// Sub-rectangulos de Variante (CONFIRM IDENTITY en w = 89px)
-#define SCALE_IDENTITY_HEADER_X         0.29f
-#define SCALE_IDENTITY_HEADER_Y         0.33f
-#define SCALE_IDENTITY_PHOTO_TAG        0.34f
-#define SCALE_IDENTITY_NAME_Y           0.35f
-#define SCALE_IDENTITY_BADGE_X          0.32f
-#define SCALE_IDENTITY_BADGE_Y          0.36f
+// Sub-rectangulos de Variante (CONFIRM IDENTITY en x = 287, w = 99px)
+#define SCALE_IDENTITY_HEADER_X         0.45f
+#define SCALE_IDENTITY_HEADER_Y         0.52f
+#define SCALE_IDENTITY_PHOTO_TAG        0.52f
+#define SCALE_IDENTITY_NAME_Y           0.56f
+#define SCALE_IDENTITY_BADGE_X          0.50f
+#define SCALE_IDENTITY_BADGE_Y          0.56f
 
 // Barra Inferior Estilo Terminal y Logo TVA
-#define SCALE_TERMINAL_BOTTOM_X         0.38f
-#define SCALE_TERMINAL_BOTTOM_Y         0.39f
-#define SCALE_TVA_LOGO_X                0.40f
-#define SCALE_TVA_LOGO_Y                0.40f
-#define SCALE_TVA_CODE_X                0.35f
-#define SCALE_TVA_CODE_Y                0.39f
+#define SCALE_TERMINAL_BOTTOM_X         0.56f
+#define SCALE_TERMINAL_BOTTOM_Y         0.60f
+#define SCALE_TVA_LOGO_X                0.56f
+#define SCALE_TVA_LOGO_Y                0.58f
+#define SCALE_TVA_CODE_X                0.54f
+#define SCALE_TVA_CODE_Y                0.58f
 
 // -----------------------------------------------------------------------------
 // 6. LAYOUT GEOMETRICO DE LA PANTALLA SUPERIOR (400x240)
@@ -167,17 +186,17 @@
 #define OUTER_FRAME_W                   392.0f
 #define OUTER_FRAME_H                   232.0f
 
-// Columna Izquierda de 5 Glifos Placeholder (x = 9..21)
-#define GLYPH_COL_X                     10.0f
-#define GLYPH_BOX_SIZE                  10.0f
+// Columna Izquierda de 5 Glifos (12x12 px en x = 9..21)
+#define GLYPH_COL_X                     9.0f
+#define GLYPH_BOX_SIZE                  12.0f
 #define GLYPH_START_Y                   22.0f
 #define GLYPH_STEP_Y                    38.0f
 
-// Area del Grafico de la Linea Temporal (x = 26 hasta x = 293, dejando 4px antes de x = 297)
+// Area del Grafico de la Linea Temporal (x = 26 hasta x = 284, dejando 3px antes de x = 287)
 #define GRAPH_BOX_X                     26.0f
 #define GRAPH_BOX_Y                     10.0f
-#define GRAPH_RIGHT_X                   293.0f
-#define GRAPH_BOX_W                     (GRAPH_RIGHT_X - GRAPH_BOX_X)   // 267.0f
+#define GRAPH_RIGHT_X                   284.0f
+#define GRAPH_BOX_W                     (GRAPH_RIGHT_X - GRAPH_BOX_X)   // 258.0f
 #define GRAPH_BOX_H                     206.0f
 #define GRAPH_BOTTOM_Y                  216.0f
 
@@ -187,51 +206,50 @@
 #define TIMELINE_THRESHOLD_BOTTOM       182.0f
 
 // Columna de numeros de escala ("02", "03", "04") junto al borde derecho del grafico
-#define GRAPH_SCALE_NUM_X               275.0f
+#define GRAPH_SCALE_NUM_X               264.0f
 
 // Mapeo cronologico en el eje X (Anios -> Posicion X de nacimiento de rama)
 #define TIMELINE_YEAR_MIN               1880
 #define TIMELINE_YEAR_MAX               2060
 #define TIMELINE_SPAWN_X_MIN            40.0f
-#define TIMELINE_SPAWN_X_MAX            196.0f
-#define TIMELINE_BRANCH_MAX_X           270.0f
+#define TIMELINE_SPAWN_X_MAX            188.0f
+#define TIMELINE_BRANCH_MAX_X           262.0f
 
-// Cajas de Variante ADENTRO del Segundo Rectangulo (x = 297, w = 89)
-#define CARD_COL_X                      297.0f
-#define CARD_COL_W                      89.0f
-#define CARD_CENTER_X                   (CARD_COL_X + (CARD_COL_W * 0.5f)) // 341.5f
+// Cajas de Variante ADENTRO del Segundo Rectangulo (x = 287, w = 99)
+#define CARD_COL_X                      287.0f
+#define CARD_COL_W                      99.0f
+#define CARD_CENTER_X                   (CARD_COL_X + (CARD_COL_W * 0.5f)) // 336.5f
 
-// Caja 1: CONFIRM IDENTITY (x = 297, y = 13, w = 89, h = 15)
+// Caja 1: CONFIRM IDENTITY (x = 287, y = 13, w = 99, h = 15)
 #define CARD_BOX1_Y                     13.0f
 #define CARD_BOX1_H                     15.0f
 
-// Caja 2: Foto (x = 297, y = 30, w = 89, h = 104)
+// Caja 2: Foto (x = 287, y = 30, w = 99, h = 104)
 #define CARD_BOX2_Y                     30.0f
 #define CARD_BOX2_H                     104.0f
 
-// Caja 3: Nombre (x = 297, y = 136, w = 89, h = 20)
+// Caja 3: Nombre (x = 287, y = 136, w = 99, h = 20)
 #define CARD_BOX3_Y                     136.0f
 #define CARD_BOX3_H                     20.0f
 
-// Caja 4: VARIANT# (x = 297, y = 158, w = 89, h = 20)
+// Caja 4: VARIANT# (x = 287, y = 158, w = 99, h = 20)
 #define CARD_BOX4_Y                     158.0f
 #define CARD_BOX4_H                     20.0f
 
-// Caja del Placeholder del Logo TVA achicado 4 veces en area (w=46, h=15)
-// Ubicado en la esquina inferior derecha de la columna
-#define CARD_TVA_LOGO_X                 342.0f
-#define CARD_TVA_LOGO_Y                 197.0f
-#define CARD_TVA_LOGO_W                 46.0f
-#define CARD_TVA_LOGO_H                 15.0f
+// Sprite del Logo TVA (44x20 px en esquina inferior derecha)
+#define CARD_TVA_LOGO_X                 346.0f
+#define CARD_TVA_LOGO_Y                 196.0f
+#define CARD_TVA_LOGO_W                 44.0f
+#define CARD_TVA_LOGO_H                 20.0f
 
 // Textos de Telemetria internos del monitor (esquina inferior izquierda de Rect 2)
 #define GRID_DECOR_X                    29.0f
-#define GRID_DECOR_MAG_Y                198.0f
-#define GRID_DECOR_SEG_Y                206.0f
+#define GRID_DECOR_MAG_Y                190.0f
+#define GRID_DECOR_SEG_Y                201.0f
 
-// Textos inferiores apoyados sobre la base del Rectangulo 1 (y = 223, base en y = 236)
+// Textos inferiores apoyados sobre la base del Rectangulo 1 (y = 219, base en y = 236)
 #define TERMINAL_DATE_X                 8.0f
-#define TERMINAL_LINE_Y                 223.0f
-#define TERMINAL_ENERGY_X               334.0f
+#define TERMINAL_LINE_Y                 219.0f
+#define TERMINAL_ENERGY_X               324.0f
 
 #endif // TVA_STYLE_H

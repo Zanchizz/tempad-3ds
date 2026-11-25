@@ -1,4 +1,5 @@
 #include "dashboard.h"
+#include "assets.h"
 #include "timeline.h"
 #include <stdio.h>
 #include <string.h>
@@ -14,7 +15,22 @@ static int s_pressedDashAction = -1;
 
 static int s_lastTappedApp = -1;
 static int s_tapTimer = 99;
+static int s_actionFlashIdx = -1;
+static int s_actionFlashTimer = 0;
 static char s_statusMessage[64];
+
+// ---------------------------------------------------------
+// Helper de Texto con Glow CRT (4 pasadas de halo + nucleo nitido)
+// ---------------------------------------------------------
+static void drawGlowText(C2D_Text* txt, u32 flags, float x, float y, float z,
+                         float scaleX, float scaleY, u32 haloCol, u32 coreCol) {
+    u32 drawFlags = flags | C2D_WithColor;
+    C2D_DrawText(txt, drawFlags, x - 1.0f, y,        z, scaleX, scaleY, haloCol);
+    C2D_DrawText(txt, drawFlags, x + 1.0f, y,        z, scaleX, scaleY, haloCol);
+    C2D_DrawText(txt, drawFlags, x,        y - 1.0f, z, scaleX, scaleY, haloCol);
+    C2D_DrawText(txt, drawFlags, x,        y + 1.0f, z, scaleX, scaleY, haloCol);
+    C2D_DrawText(txt, drawFlags, x,        y,        z, scaleX, scaleY, coreCol);
+}
 
 void dashboardInit(void) {
     s_selectedDashApp = DASH_APP_TIMEDOOR;
@@ -22,28 +38,30 @@ void dashboardInit(void) {
     s_pressedDashAction = -1;
     s_lastTappedApp = -1;
     s_tapTimer = 99;
+    s_actionFlashIdx = -1;
+    s_actionFlashTimer = 0;
 
-    // 2x2 Matrix in Left Area (x: 10 to 206)
-    const float tileW = 94.0f;
+    // 2x2 Matrix Invisible Hitboxes in Left Area (x: 8 to 192)
+    const float tileW = 90.0f;
     const float tileH = 76.0f;
-    const float col0X = 10.0f;
-    const float col1X = 110.0f;
+    const float col0X = 8.0f;
+    const float col1X = 102.0f;
     const float row0Y = 44.0f;
     const float row1Y = 126.0f;
 
-    s_dashTiles[DASH_APP_TIMEDOOR]     = (DashboardTileDef){ col0X, row0Y, tileW, tileH, "TIMEDOOR",     "PRG // 001" };
-    s_dashTiles[DASH_APP_MISS_MINUTES] = (DashboardTileDef){ col1X, row0Y, tileW, tileH, "MISS MINUTES", "AI // SYS"  };
-    s_dashTiles[DASH_APP_SETTINGS]     = (DashboardTileDef){ col0X, row1Y, tileW, tileH, "SETTINGS",     "CFG // 042" };
-    s_dashTiles[DASH_APP_DIRECTORY]    = (DashboardTileDef){ col1X, row1Y, tileW, tileH, "DIRECTORY",    "LOG // TVA" };
+    s_dashTiles[DASH_APP_TIMEDOOR]     = (DashboardTileDef){ col0X, row0Y, tileW, tileH, "TIMEDOOR",     "" };
+    s_dashTiles[DASH_APP_MISS_MINUTES] = (DashboardTileDef){ col1X, row0Y, tileW, tileH, "MISS MINUTES", "" };
+    s_dashTiles[DASH_APP_SETTINGS]     = (DashboardTileDef){ col0X, row1Y, tileW, tileH, "SETTINGS",     "" };
+    s_dashTiles[DASH_APP_DIRECTORY]    = (DashboardTileDef){ col1X, row1Y, tileW, tileH, "DIRECTORY",    "" };
 
-    // Action List in Right Area (x: 212 to 310)
-    const float actX = 212.0f;
-    const float actW = 98.0f;
-    const float actH = 38.0f;
+    // Action List Invisible Hitboxes in Right Area (x: 198 to 314)
+    const float actX = 198.0f;
+    const float actW = 116.0f;
+    const float actH = 34.0f;
 
-    s_dashActions[DASH_ACT_RUN]    = (DashboardActionDef){ actX, 66.0f,  actW, actH, "RUN PROGRAM"    };
-    s_dashActions[DASH_ACT_STATUS] = (DashboardActionDef){ actX, 110.0f, actW, actH, "CHECK STATUS"   };
-    s_dashActions[DASH_ACT_PURGE]  = (DashboardActionDef){ actX, 154.0f, actW, actH, "PRUNE TIMELINE" };
+    s_dashActions[DASH_ACT_RUN]    = (DashboardActionDef){ actX, 72.0f,  actW, actH, "1. RUN PROGRAM"    };
+    s_dashActions[DASH_ACT_STATUS] = (DashboardActionDef){ actX, 112.0f, actW, actH, "2. CHECK STATUS"   };
+    s_dashActions[DASH_ACT_PURGE]  = (DashboardActionDef){ actX, 152.0f, actW, actH, "3. PRUNE TIMELINE" };
 
     dashboardSetStatus("SYSTEM NOMINAL // SACRED TIMELINE");
 }
@@ -51,6 +69,12 @@ void dashboardInit(void) {
 void dashboardUpdate(void) {
     if (s_tapTimer < 100) {
         s_tapTimer++;
+    }
+    if (s_actionFlashTimer > 0) {
+        s_actionFlashTimer--;
+        if (s_actionFlashTimer == 0) {
+            s_actionFlashIdx = -1;
+        }
     }
 }
 
@@ -120,7 +144,7 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
         if (s_selectedDashApp < 2) s_selectedDashApp += 2;
     }
 
-    // 3. Continuous Touch Feedback (kHeld)
+    // 5. Continuous Touch Feedback (kHeld)
     s_pressedDashTile = -1;
     s_pressedDashAction = -1;
 
@@ -143,9 +167,9 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
         }
     }
 
-    // 4. Touch Trigger Actions (kDown)
+    // 6. Touch Trigger Actions (kDown)
     if (kDown & KEY_TOUCH) {
-        // Touch on 2x2 Matrix
+        // Touch on 2x2 Matrix (invisible hitboxes)
         for (int i = 0; i < DASH_APP_COUNT; i++) {
             const DashboardTileDef* t = &s_dashTiles[i];
             if (touch.px >= t->x && touch.px <= (t->x + t->w) &&
@@ -175,11 +199,14 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
             }
         }
 
-        // Touch on Action List
+        // Touch on Action List (invisible hitboxes + brief glow feedback flash)
         for (int i = 0; i < DASH_ACT_COUNT; i++) {
             const DashboardActionDef* a = &s_dashActions[i];
             if (touch.px >= a->x && touch.px <= (a->x + a->w) &&
                 touch.py >= a->y && touch.py <= (a->y + a->h)) {
+
+                s_actionFlashIdx = i;
+                s_actionFlashTimer = 18;
 
                 if (i == DASH_ACT_RUN) {
                     if (s_selectedDashApp == DASH_APP_TIMEDOOR) {
@@ -204,99 +231,88 @@ void dashboardHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* c
 }
 
 void dashboardRender(C2D_TextBuf textBufDynamic) {
-    // 1. Top Title Bar
+    // 1. Top Title Bar & Status Telemetry
     C2D_Text txtTitle;
     tempadParseText(&txtTitle, textBufDynamic, "TEMPAD // TVA MAIN DASHBOARD");
-    C2D_DrawText(&txtTitle, C2D_WithColor, 12.0f, 8.0f, 0.5f, 0.45f, 0.47f, CLR_AMBER_BRIGHT);
+    drawGlowText(&txtTitle, 0, 12.0f, 5.0f, 0.5f, 0.65f, 0.68f, COLOR_DASH_GLOW_HALO, COLOR_TVA_ORANGE);
 
-    // Quick Status Telemetry
     C2D_Text txtQuick;
     tempadParseText(&txtQuick, textBufDynamic, s_statusMessage);
-    C2D_DrawText(&txtQuick, C2D_WithColor, 12.0f, 25.0f, 0.5f, 0.37f, 0.40f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtQuick, C2D_WithColor, 12.0f, 23.0f, 0.5f, 0.54f, 0.60f, COLOR_DASH_DIM);
 
-    // 2. 2x2 Matrix (TIMEDOOR, MISS MINUTES, SETTINGS, DIRECTORY)
+    // 2. 2x2 Floating Modules (NO boxes or borders — icons & labels float directly over grid)
     for (int i = 0; i < DASH_APP_COUNT; i++) {
         const DashboardTileDef* t = &s_dashTiles[i];
         bool isSelected = (s_selectedDashApp == i);
         bool isPressed  = (s_pressedDashTile == i);
+        bool isGlowing  = (isSelected || isPressed);
 
         float drawX = t->x;
-        float drawY = isPressed ? (t->y + 2.0f) : t->y;
+        float drawY = t->y;
 
-        u32 bgCol     = isSelected ? (isPressed ? CLR_AMBER_CORE : CLR_AMBER_BRIGHT) : CLR_BTN_NORMAL;
-        u32 borderCol = isSelected ? CLR_AMBER_CORE : (isPressed ? CLR_AMBER_BRIGHT : CLR_BORDER_MID);
-        u32 textCol   = isSelected ? CLR_TEXT_INVERTED : CLR_AMBER_TEXT;
-        u32 subCol    = isSelected ? C2D_Color32(40, 20, 5, 255) : CLR_AMBER_DARK;
-
-        C2D_DrawRectSolid(drawX, drawY, 0.0f, t->w, t->h, bgCol);
-        drawBoxOutline(drawX, drawY, t->w, t->h, 1.5f, borderCol);
-
-        // Stylized Retro Icon / Glyph
-        float iconBoxX = drawX + 8.0f;
-        float iconBoxY = drawY + 8.0f;
-        u32 iconCol = isSelected ? CLR_TEXT_INVERTED : CLR_AMBER_BRIGHT;
-
-        if (i == DASH_APP_TIMEDOOR) {
-            drawBoxOutline(iconBoxX, iconBoxY, 18.0f, 22.0f, 1.5f, iconCol);
-            C2D_DrawLine(iconBoxX + 9.0f, iconBoxY, iconCol, iconBoxX + 9.0f, iconBoxY + 22.0f, iconCol, 1.0f, 0.0f);
-        } else if (i == DASH_APP_MISS_MINUTES) {
-            drawBoxOutline(iconBoxX, iconBoxY + 2.0f, 18.0f, 18.0f, 1.5f, iconCol);
-            C2D_DrawLine(iconBoxX + 9.0f, iconBoxY + 5.0f, iconCol, iconBoxX + 9.0f, iconBoxY + 11.0f, iconCol, 1.5f, 0.0f);
-            C2D_DrawLine(iconBoxX + 9.0f, iconBoxY + 11.0f, iconCol, iconBoxX + 14.0f, iconBoxY + 11.0f, iconCol, 1.5f, 0.0f);
-        } else if (i == DASH_APP_SETTINGS) {
-            drawBoxOutline(iconBoxX, iconBoxY + 2.0f, 18.0f, 18.0f, 1.0f, iconCol);
-            C2D_DrawLine(iconBoxX + 4.0f, iconBoxY + 7.0f, iconCol, iconBoxX + 14.0f, iconBoxY + 7.0f, iconCol, 1.5f, 0.0f);
-            C2D_DrawLine(iconBoxX + 4.0f, iconBoxY + 13.0f, iconCol, iconBoxX + 14.0f, iconBoxY + 13.0f, iconCol, 1.5f, 0.0f);
-        } else {
-            drawBoxOutline(iconBoxX, iconBoxY + 2.0f, 18.0f, 18.0f, 1.5f, iconCol);
-            C2D_DrawLine(iconBoxX + 3.0f, iconBoxY + 6.0f, iconCol, iconBoxX + 15.0f, iconBoxY + 6.0f, iconCol, 1.0f, 0.0f);
-            C2D_DrawLine(iconBoxX + 3.0f, iconBoxY + 10.0f, iconCol, iconBoxX + 15.0f, iconBoxY + 10.0f, iconCol, 1.0f, 0.0f);
-            C2D_DrawLine(iconBoxX + 3.0f, iconBoxY + 14.0f, iconCol, iconBoxX + 10.0f, iconBoxY + 14.0f, iconCol, 1.0f, 0.0f);
+        // Sprite centrado usando el centro real de cada sprite (subtex->width/2, subtex->height/2)
+        bool drewIconSprite = false;
+        if (assetsHasUiSheet()) {
+            C2D_Image iconImg = assetsGetDashboardIcon(i, isGlowing);
+            if (iconImg.tex != NULL) {
+                float iconCenterX = drawX + (t->w * 0.5f);
+                float iconCenterY = drawY + 27.0f;
+                float iconX = iconCenterX - ((float)iconImg.subtex->width * 0.5f);
+                float iconY = iconCenterY - ((float)iconImg.subtex->height * 0.5f);
+                C2D_DrawImageAt(iconImg, iconX, iconY, 0.0f, NULL, 1.0f, 1.0f);
+                drewIconSprite = true;
+            }
         }
 
+        if (!drewIconSprite) {
+            float iconX = drawX + (t->w - 32.0f) * 0.5f;
+            float iconY = drawY + 10.0f;
+            drawBoxOutline(iconX, iconY, 32.0f, 32.0f, 1.5f, isGlowing ? COLOR_DASH_GLOW_CORE : COLOR_DASH_DIM);
+        }
+
+        // Nombre del modulo centrado debajo del icono (brillo CRT al seleccionar / apagado inactivo)
         C2D_Text txtTile;
         tempadParseText(&txtTile, textBufDynamic, t->title);
-        C2D_DrawText(&txtTile, C2D_WithColor, drawX + 5.0f, drawY + 34.0f, 0.5f, 0.40f, 0.43f, textCol);
+        float labelCenterX = drawX + (t->w * 0.5f);
+        float labelY = drawY + 55.0f;
 
-        C2D_Text txtSub;
-        tempadParseText(&txtSub, textBufDynamic, t->code);
-        C2D_DrawText(&txtSub, C2D_WithColor, drawX + 5.0f, drawY + 53.0f, 0.5f, 0.36f, 0.38f, subCol);
+        if (isGlowing) {
+            drawGlowText(&txtTile, C2D_AlignCenter, labelCenterX, labelY, 0.5f,
+                         0.53f, 0.58f, COLOR_DASH_GLOW_HALO, COLOR_DASH_GLOW_CORE);
+        } else {
+            C2D_DrawText(&txtTile, C2D_WithColor | C2D_AlignCenter, labelCenterX, labelY, 0.5f,
+                         0.53f, 0.58f, COLOR_DASH_DIM);
+        }
     }
 
-    // 3. Action List (Right Column)
+    // 3. Floating Right Panel: "ACTION LIST //////" + Numbered List (NO boxes or borders)
     C2D_Text txtActHeader;
-    tempadParseText(&txtActHeader, textBufDynamic, "ACTIONS //////");
-    C2D_DrawText(&txtActHeader, C2D_WithColor, 214.0f, 44.0f, 0.5f, 0.40f, 0.43f, CLR_AMBER_BRIGHT);
+    tempadParseText(&txtActHeader, textBufDynamic, "ACTION LIST //////");
+    drawGlowText(&txtActHeader, 0, 198.0f, 44.0f, 0.5f,
+                 0.49f, 0.56f, COLOR_DASH_GLOW_HALO, COLOR_DASH_GLOW_CORE);
 
     for (int i = 0; i < DASH_ACT_COUNT; i++) {
         const DashboardActionDef* a = &s_dashActions[i];
-        bool isPressed = (s_pressedDashAction == i);
-
-        float drawX = a->x;
-        float drawY = isPressed ? (a->y + 2.0f) : a->y;
-
-        u32 btnBg     = isPressed ? CLR_AMBER_BRIGHT : CLR_BTN_NORMAL;
-        u32 btnBorder = isPressed ? CLR_AMBER_CORE   : CLR_BORDER_MID;
-        u32 btnText   = isPressed ? CLR_TEXT_INVERTED: CLR_AMBER_TEXT;
-
-        if (i == DASH_ACT_PURGE) {
-            btnBg     = isPressed ? CLR_PURGE_BTN_PRESSED : CLR_PURGE_BTN_NORMAL;
-            btnBorder = isPressed ? CLR_AMBER_CORE        : CLR_PURGE_BTN_BORDER;
-            btnText   = isPressed ? CLR_TEXT_INVERTED     : C2D_Color32(255, 120, 90, 255);
-        }
-
-        C2D_DrawRectSolid(drawX, drawY, 0.0f, a->w, a->h, btnBg);
-        drawBoxOutline(drawX, drawY, a->w, a->h, 1.5f, btnBorder);
+        bool isActive = (s_pressedDashAction == i) ||
+                        (s_actionFlashIdx == i && s_actionFlashTimer > 0);
 
         C2D_Text txtLabel;
         tempadParseText(&txtLabel, textBufDynamic, a->label);
-        C2D_DrawText(&txtLabel, C2D_WithColor | C2D_AlignCenter,
-                     drawX + (a->w / 2.0f), drawY + 9.0f, 0.5f, 0.38f, 0.42f, btnText);
+        float textX = a->x;
+        float textY = a->y + 8.0f;
+
+        if (isActive) {
+            u32 haloCol = (i == DASH_ACT_PURGE) ? COLOR_DASH_RED_HALO : COLOR_DASH_GLOW_HALO;
+            u32 coreCol = (i == DASH_ACT_PURGE) ? COLOR_DASH_RED_CORE : COLOR_DASH_GLOW_CORE;
+            drawGlowText(&txtLabel, 0, textX, textY, 0.5f, 0.51f, 0.58f, haloCol, coreCol);
+        } else {
+            u32 idleCol = (i == DASH_ACT_PURGE) ? COLOR_DASH_RED_DIM : COLOR_DASH_DIM;
+            C2D_DrawText(&txtLabel, C2D_WithColor, textX, textY, 0.5f, 0.51f, 0.58f, idleCol);
+        }
     }
 
-    // 4. Bottom Footer Instructions
+    // 4. Bottom Footer Instructions (Clean, no TVA logo on bottom screen)
     C2D_Text txtFooter;
     tempadParseText(&txtFooter, textBufDynamic, "SELECT MODULE OR 'RUN PROGRAM' // [START] EXIT");
-    C2D_DrawText(&txtFooter, C2D_WithColor | C2D_AlignCenter, 160.0f, 214.0f, 0.5f, 0.37f, 0.40f, CLR_AMBER_DARK);
+    C2D_DrawText(&txtFooter, C2D_WithColor | C2D_AlignCenter, 160.0f, 212.0f, 0.5f, 0.51f, 0.58f, COLOR_AMBER_DIM);
 }
-

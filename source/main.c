@@ -1,6 +1,7 @@
 #include <3ds.h>
 #include <citro2d.h>
 #include "tempad.h"
+#include "assets.h"
 #include "timeline.h"
 #include "dashboard.h"
 #include "timedoor.h"
@@ -14,16 +15,16 @@ static void renderBottomScreen(C3D_RenderTarget* bottomScreen, C2D_TextBuf textB
     C2D_TargetClear(bottomScreen, CLR_BG_DARK);
     C2D_SceneBegin(bottomScreen);
 
-    // Subtle Retro Background Grid
-    for (float x = 20.0f; x < (float)BOTTOM_WIDTH; x += 30.0f) {
+    // Full-screen Subtle Orange CRT Grid (0..320 x 0..240)
+    for (float x = 16.0f; x < (float)BOTTOM_WIDTH; x += 24.0f) {
         C2D_DrawLine(x, 0.0f, CLR_GRID, x, (float)BOTTOM_HEIGHT, CLR_GRID, 1.0f, 0.0f);
     }
-    for (float y = 20.0f; y < (float)BOTTOM_HEIGHT; y += 30.0f) {
+    for (float y = 16.0f; y < (float)BOTTOM_HEIGHT; y += 24.0f) {
         C2D_DrawLine(0.0f, y, CLR_GRID, (float)BOTTOM_WIDTH, y, CLR_GRID, 1.0f, 0.0f);
     }
 
     // Outer Chassis Frame
-    drawBoxOutline(2.0f, 2.0f, BOTTOM_WIDTH - 4.0f, BOTTOM_HEIGHT - 4.0f, 2.0f, CLR_BORDER_DIM);
+    drawBoxOutline(2.0f, 2.0f, BOTTOM_WIDTH - 4.0f, BOTTOM_HEIGHT - 4.0f, 1.8f, CLR_BORDER_MID);
 
     // State View Dispatch
     switch (currentState) {
@@ -50,12 +51,14 @@ int main(int argc, char* argv[]) {
     C2D_Prepare();
 
     g_tvaFont = C2D_FontLoad("romfs:/tva_font.bcfnt");
+    assetsInit();
 
     C3D_RenderTarget* topScreen = C2D_CreateScreenTarget(GFX_TOP, GFX_LEFT);
     C3D_RenderTarget* bottomScreen = C2D_CreateScreenTarget(GFX_BOTTOM, GFX_LEFT);
 
     C2D_TextBuf textBufDynamic = C2D_TextBufNew(2048);
     if (!textBufDynamic) {
+        assetsExit();
         if (g_tvaFont) C2D_FontFree(g_tvaFont);
         C2D_Fini();
         C3D_Fini();
@@ -113,6 +116,7 @@ int main(int argc, char* argv[]) {
     }
 
     C2D_TextBufDelete(textBufDynamic);
+    assetsExit();
     if (g_tvaFont) {
         C2D_FontFree(g_tvaFont);
     }
