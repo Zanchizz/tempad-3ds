@@ -1,0 +1,15 @@
+--atlas -f rgba8888 -z auto
+ui/tva_logo.png
+ui/glyph_1.png
+ui/glyph_2.png
+ui/glyph_3.png
+ui/glyph_4.png
+ui/glyph_5.png
+ui/icon_timedoor_dim.png
+ui/icon_missminutes_dim.png
+ui/icon_settings_dim.png
+ui/icon_directory_dim.png
+ui/icon_timedoor_glow.png
+ui/icon_missminutes_glow.png
+ui/icon_settings_glow.png
+ui/icon_directory_glow.png

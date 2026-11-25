@@ -157,7 +157,7 @@ all:
 #---------------------------------------------------------------------------------
 clean:
 	@echo clean ...
-	@rm -fr $(BUILD) $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf
+	@rm -fr $(BUILD) $(GFXBUILD)/*.t3x $(TARGET).3dsx $(OUTPUT).smdh $(TARGET).elf
 
 
 #---------------------------------------------------------------------------------
@@ -166,7 +166,7 @@ else
 #---------------------------------------------------------------------------------
 # main targets
 #---------------------------------------------------------------------------------
-$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS)
+$(OUTPUT).3dsx	:	$(OUTPUT).elf $(_3DSXDEPS) $(addprefix $(TOPDIR)/$(GFXBUILD)/,$(T3XFILES))
 
 $(OFILES_SOURCES) : $(HFILES)
 
@@ -213,7 +213,7 @@ endef
 	@$(call shader-as,$(foreach file,$(shell cat $<),$(dir $<)$(file)))
 
 #---------------------------------------------------------------------------------
-%.t3x	%.h	:	%.t3s
+$(TOPDIR)/$(GFXBUILD)/%.t3x	%.h	:	%.t3s
 #---------------------------------------------------------------------------------
 	@echo $(notdir $<)
 	@tex3ds -i $< -H $*.h -d $*.d -o $(TOPDIR)/$(GFXBUILD)/$*.t3x

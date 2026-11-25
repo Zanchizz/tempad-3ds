@@ -1,0 +1,11 @@
+--atlas -f rgba8888 -z auto
+variants/var_loki.png
+variants/var_sylvie.png
+variants/var_gator.png
+variants/var_classic.png
+variants/var_timely.png
+variants/var_wanda.png
+variants/var_wade.png
+variants/var_peter.png
+variants/var_strange.png
+variants/var_magneto.png
