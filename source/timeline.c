@@ -552,12 +552,18 @@ void timelineRenderTopScreen(C3D_RenderTarget* topScreen, C2D_TextBuf textBufDyn
 
     // =========================================================
     // CAPA 3: Grilla completa sobre todo el interior del Rectangulo 1 (4..396 x 4..236)
+    //         Coordenadas enteras + C2D_DrawRectSolid para evitar descarte sub-pixel en PICA200
     // =========================================================
-    for (float x = OUTER_FRAME_X + 22.0f; x < (OUTER_FRAME_X + OUTER_FRAME_W); x += 28.0f) {
-        C2D_DrawLine(x, OUTER_FRAME_Y + 1.0f, COLOR_GRID_LINE, x, OUTER_FRAME_Y + OUTER_FRAME_H - 1.0f, COLOR_GRID_LINE, THICK_GRID_LINE, 0.0f);
+    const int gridX0 = (int)OUTER_FRAME_X + 1;
+    const int gridY0 = (int)OUTER_FRAME_Y + 1;
+    const int gridW  = (int)OUTER_FRAME_W - 2;
+    const int gridH  = (int)OUTER_FRAME_H - 2;
+
+    for (int x = gridX0 + 21; x < (gridX0 + gridW); x += 28) {
+        C2D_DrawRectSolid((float)x, (float)gridY0, 0.0f, GRID_LINE_THICKNESS, (float)gridH, COLOR_GRID_LINE);
     }
-    for (float y = OUTER_FRAME_Y + 20.0f; y < (OUTER_FRAME_Y + OUTER_FRAME_H); y += 28.0f) {
-        C2D_DrawLine(OUTER_FRAME_X + 1.0f, y, COLOR_GRID_LINE, OUTER_FRAME_X + OUTER_FRAME_W - 1.0f, y, COLOR_GRID_LINE, THICK_GRID_LINE, 0.0f);
+    for (int y = gridY0 + 19; y < (gridY0 + gridH); y += 28) {
+        C2D_DrawRectSolid((float)gridX0, (float)y, 0.0f, (float)gridW, GRID_LINE_THICKNESS, COLOR_GRID_LINE);
     }
 
     // =========================================================

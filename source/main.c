@@ -15,12 +15,12 @@ static void renderBottomScreen(C3D_RenderTarget* bottomScreen, C2D_TextBuf textB
     C2D_TargetClear(bottomScreen, CLR_BG_DARK);
     C2D_SceneBegin(bottomScreen);
 
-    // Full-screen Subtle Orange CRT Grid (0..320 x 0..240)
-    for (float x = 16.0f; x < (float)BOTTOM_WIDTH; x += 24.0f) {
-        C2D_DrawLine(x, 0.0f, CLR_GRID, x, (float)BOTTOM_HEIGHT, CLR_GRID, 1.0f, 0.0f);
+    // Full-screen Subtle Orange CRT Grid (0..320 x 0..240) with integer C2D_DrawRectSolid
+    for (int x = 16; x < BOTTOM_WIDTH; x += 24) {
+        C2D_DrawRectSolid((float)x, 0.0f, 0.0f, GRID_LINE_THICKNESS, (float)BOTTOM_HEIGHT, CLR_GRID);
     }
-    for (float y = 16.0f; y < (float)BOTTOM_HEIGHT; y += 24.0f) {
-        C2D_DrawLine(0.0f, y, CLR_GRID, (float)BOTTOM_WIDTH, y, CLR_GRID, 1.0f, 0.0f);
+    for (int y = 16; y < BOTTOM_HEIGHT; y += 24) {
+        C2D_DrawRectSolid(0.0f, (float)y, 0.0f, (float)BOTTOM_WIDTH, GRID_LINE_THICKNESS, CLR_GRID);
     }
 
     // Outer Chassis Frame
@@ -109,7 +109,8 @@ int main(int argc, char* argv[]) {
         C2D_TextBufClear(textBufDynamic);
 
         const Location* activeLoc = timedoorGetSelectedLocation();
-        timelineRenderTopScreen(topScreen, textBufDynamic, currentState, activeLoc ? activeLoc->name : "UNKNOWN");
+        AppState topState = timedoorIsPortalOpen() ? STATE_TIMEDOOR_ACTIVE : currentState;
+        timelineRenderTopScreen(topScreen, textBufDynamic, topState, activeLoc ? activeLoc->name : "UNKNOWN");
         renderBottomScreen(bottomScreen, textBufDynamic, currentState);
 
         C3D_FrameEnd(0);

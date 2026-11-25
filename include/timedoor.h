@@ -13,5 +13,6 @@ void timedoorHandleInput(u32 kDown, u32 kHeld, touchPosition touch, AppState* cu
 void timedoorRenderSelect(C2D_TextBuf textBufDynamic, float animPhase);
 void timedoorRenderActive(C2D_TextBuf textBufDynamic, float animPhase);
 const Location* timedoorGetSelectedLocation(void);
+bool timedoorIsPortalOpen(void);
 
 #endif // TIMEDOOR_H

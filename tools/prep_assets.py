@@ -60,17 +60,17 @@ GLYPHS = [
     ("glyph_5", ["glyph_5"]),
 ]
 
-# Paleta duotono ambar CRT de la TVA
-COLOR_BLACK = (10, 4, 0)      # #0A0400
-COLOR_MID   = (217, 107, 0)   # #D96B00
-COLOR_HIGH  = (255, 184, 51)  # #FFB833
+# Paleta duotono naranja quemado CRT de la TVA (calibrada para pantalla fisica 3DS)
+COLOR_BLACK = (8, 2, 0)        # #080200
+COLOR_MID   = (196, 66, 0)     # #C44200
+COLOR_HIGH  = (255, 150, 36)   # #FF9624
 
-# Colores pre-pintados para sprites de UI (sin depender de tinte por hardware)
-COLOR_TVA_LOGO_RGB      = (225, 110, 20)
-COLOR_ICON_DIM_RGB      = (175, 82, 16)    # Estado inactivo (naranja medio/apagado)
-COLOR_ICON_GLOW_FAR_RGB = (255, 110, 10)   # Capa inferior glow amplio (radius=4)
-COLOR_ICON_GLOW_MID_RGB = (255, 145, 25)   # Capa media glow cercano (radius=2)
-COLOR_ICON_GLOW_TOP_RGB = (255, 215, 115)  # Nucleo brillante ambar luminoso
+# Colores pre-pintados en naranja profundo para sprites de UI (sin tinte por hardware)
+COLOR_TVA_LOGO_RGB      = (220, 68, 4)     # Logo TVA y 5 glifos laterales
+COLOR_ICON_DIM_RGB      = (165, 50, 4)     # Iconos en estado inactivo
+COLOR_ICON_GLOW_FAR_RGB = (235, 50, 0)     # Capa inferior glow amplio
+COLOR_ICON_GLOW_MID_RGB = (248, 92, 6)     # Capa media glow cercano
+COLOR_ICON_GLOW_TOP_RGB = (255, 158, 38)   # Nucleo brillante naranja profundo
 
 VARIANT_SIZE        = (94, 98)
 ICON_INNER_SIZE     = (46, 46)
@@ -304,7 +304,7 @@ def process_dashboard_icon_variants(src_path, out_dim_path, out_glow_path, name)
 
 
 def process_ui_sprite(src_path, out_path, name, target_size):
-    """Prepara glifo lateral preservando proporcion y transparencia."""
+    """Prepara glifo lateral re-coloreado en naranja profundo (220, 68, 4) preservando transparencia."""
     if src_path is None:
         print(f"  [WARN] Falta fuente para {name}; generando placeholder.")
         img = Image.new("RGBA", target_size, (0, 0, 0, 0))
@@ -316,8 +316,11 @@ def process_ui_sprite(src_path, out_path, name, target_size):
     with Image.open(src_path) as raw:
         rgba = extract_alpha_mask(raw.convert("RGBA"))
         fitted = resize_contain_rgba(rgba, target_size)
-        fitted.save(out_path, "PNG")
-        print(f"  [OK] {name}: {src_path.name} -> {out_path.relative_to(ROOT_DIR)} ({target_size[0]}x{target_size[1]})")
+        alpha = fitted.getchannel("A")
+        out = Image.new("RGBA", target_size, (*COLOR_TVA_LOGO_RGB, 255))
+        out.putalpha(alpha)
+        out.save(out_path, "PNG")
+        print(f"  [OK] {name}: {src_path.name} -> {out_path.relative_to(ROOT_DIR)} ({target_size[0]}x{target_size[1]}, RGB{COLOR_TVA_LOGO_RGB})")
 
 
 def process_tva_logo(src_path, out_path, target_size):

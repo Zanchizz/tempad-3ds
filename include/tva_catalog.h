@@ -109,36 +109,51 @@ static const VariantProfile g_variantCatalog[VARIANT_CATALOG_COUNT] = {
 // 2. ESTRUCTURA Y CATALOGO DE DESTINOS TEMPORALES ("SAVED TIMES" / TIMEDOOR)
 // -----------------------------------------------------------------------------
 typedef struct Location {
-    const char *name;        // Nombre del destino (ej. "2012, EARTH")
-    const char *coords;      // Coordenadas de salto temporal
+    const char *name;        // Nombre del destino (ej. "2026, EARTH")
+    const char *coords;      // Coordenadas base de referencia
     const char *era;         // Descripcion del sector / evento
     const char *image_src;   // Ruta de textura de previsualizacion en romfs
+    int year;                // Anio fijo del destino (ej. 2026)
+    int default_day;         // Dia inicial editable a mano (1..31)
+    int default_month;       // Mes inicial editable a mano (1..12)
+    const char *loc_code;    // Codigo corto para coordenadas dinamicas (ej. "ERTH")
 } Location;
 
 static const Location g_timedoorLocations[] = {
     {
+        "2026, EARTH",
+        "00.00.2026 // ERTH",
+        "EARTH-616 // CURRENT ERA",
+        "romfs:/gfx/loc_earth2026.t3x",
+        2026, 0, 0, "ERTH"
+    },
+    {
         "1705, LAMENTIS",
-        "0742.11.LMT1.9021",
+        "00.00.1705 // LMT1",
         "SECTOR C-2 // EXTINCTION",
-        "romfs:/gfx/loc_lamentis.t3x"
+        "romfs:/gfx/loc_lamentis.t3x",
+        1705, 0, 0, "LMT1"
     },
     {
         "2012, EARTH",
-        "1255.92.FGV3.8534",
+        "00.00.2012 // NY12",
         "NEW YORK // BATTLE OF NY",
-        "romfs:/gfx/loc_earth2012.t3x"
+        "romfs:/gfx/loc_earth2012.t3x",
+        2012, 0, 0, "NY12"
     },
     {
         "1412, TITAN",
-        "0412.88.TTN9.1102",
+        "00.00.1412 // TTN9",
         "GALAXY M-31 // PRE-COLLAPSE",
-        "romfs:/gfx/loc_titan.t3x"
+        "romfs:/gfx/loc_titan.t3x",
+        1412, 0, 0, "TTN9"
     },
     {
         "2077, ASGARD",
-        "2077.01.ASG4.6549",
+        "00.00.2077 // ASG4",
         "GOLDEN REALM // CATACLYSM",
-        "romfs:/gfx/loc_asgard.t3x"
+        "romfs:/gfx/loc_asgard.t3x",
+        2077, 0, 0, "ASG4"
     }
 };
 
